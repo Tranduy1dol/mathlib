@@ -10,6 +10,13 @@
 - Data-Oriented Design
 - (Profiling) PGO, WPO
 
+## Day 2
+
+---
+- `_mm256_add_epi64` and `_mm256_xor_si256` command
+- [Branch Prediction](https://stackoverflow.com/questions/11227809/why-is-processing-a-sorted-array-faster-than-processing-an-unsorted-array)
+- [Constant-Time Code](https://www.bearssl.org/constanttime.html)
+
 ### Structure
 
 ---
