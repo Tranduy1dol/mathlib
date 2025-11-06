@@ -16,3 +16,7 @@ harness = false
 [[bench]]
 name = "branch_benchmark"
 harness = false
+
+[[bench]]
+name = "xor_benchmark"
+harness = false

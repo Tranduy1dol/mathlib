@@ -26,6 +26,13 @@
 cargo asm 'mathlib::num::u256::U256::wrapping_add'
 ```
 
+## Day 4
+
+---
+- [`_mm256_xor_si256`](https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#avxnewtechs=AVX2&ig_expand=7113)
+- [`std::arch`](https://doc.rust-lang.org/std/arch/index.html)
+- `#[target_feature(enable("avx2"))]` and Runtime Detection
+
 ### Structure
 
 ---

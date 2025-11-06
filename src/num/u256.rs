@@ -1,10 +1,18 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, BitXor, Sub};
 
 #[repr(align(32))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct U256(pub [u64; 4]);
 
 impl U256 {
+    pub fn xor_safe(&self, rhs: &Self) -> Self {
+        let mut result = U256([0; 4]);
+        for i in 0..4 {
+            result.0[i] = self.0[i] ^ rhs.0[i];
+        }
+        result
+    }
+
     pub fn carrying_add(&self, rhs: &Self) -> (Self, bool) {
         let mut result = U256([0; 4]);
         let mut carry = 0;
@@ -73,5 +81,29 @@ impl<'b> Sub<&'b U256> for &U256 {
 
     fn sub(self, rhs: &'b U256) -> Self::Output {
         self.wrapping_sub(rhs)
+    }
+}
+
+impl BitXor for U256 {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { crate::arch::x86_64::avx2::xor_avx2(&self, &rhs) }
+        } else {
+            self.xor_safe(&rhs)
+        }
+    }
+}
+
+impl<'b> BitXor<&'b U256> for &U256 {
+    type Output = U256;
+
+    fn bitxor(self, rhs: &'b U256) -> Self::Output {
+        if is_x86_feature_detected!("avx2") {
+            unsafe { crate::arch::x86_64::avx2::xor_avx2(self, rhs) }
+        } else {
+            self.xor_safe(rhs)
+        }
     }
 }
