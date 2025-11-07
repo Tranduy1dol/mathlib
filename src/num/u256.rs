@@ -1,10 +1,35 @@
-use std::ops::{Add, BitXor, Sub};
+use std::ops::{Add, BitXor, Mul, Sub};
+
+use crate::num::u512::U512;
 
 #[repr(align(32))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct U256(pub [u64; 4]);
 
 impl U256 {
+    pub fn full_mul(&self, rhs: &Self) -> U512 {
+        let mut result = U512::ZERO;
+
+        for i in 0..4 {
+            let mut carry: u128 = 0;
+            for j in 0..4 {
+                let a_limb = self.0[i] as u128;
+                let b_limb = rhs.0[j] as u128;
+
+                let result_limb = result.0[i + j] as u128;
+
+                let product = a_limb * b_limb + result_limb + carry;
+
+                result.0[i + j] = product as u64;
+                carry = product >> 64;
+            }
+
+            result.0[i + 4] += carry as u64;
+        }
+
+        result
+    }
+
     pub fn xor_safe(&self, rhs: &Self) -> Self {
         let mut result = U256([0; 4]);
         for i in 0..4 {
@@ -105,5 +130,33 @@ impl<'b> BitXor<&'b U256> for &U256 {
         } else {
             self.xor_safe(rhs)
         }
+    }
+}
+
+impl Mul for U256 {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let full_result = self.full_mul(&rhs);
+        U256([
+            full_result.0[0],
+            full_result.0[1],
+            full_result.0[2],
+            full_result.0[3],
+        ])
+    }
+}
+
+impl<'b> Mul<&'b U256> for &U256 {
+    type Output = U256;
+
+    fn mul(self, rhs: &'b U256) -> Self::Output {
+        let full_result = self.full_mul(rhs);
+        U256([
+            full_result.0[0],
+            full_result.0[1],
+            full_result.0[2],
+            full_result.0[3],
+        ])
     }
 }

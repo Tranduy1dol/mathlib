@@ -33,6 +33,11 @@ cargo asm 'mathlib::num::u256::U256::wrapping_add'
 - [`std::arch`](https://doc.rust-lang.org/std/arch/index.html)
 - `#[target_feature(enable("avx2"))]` and Runtime Detection
 
+## Day 5
+
+---
+- Implement `U256::full_mul`
+
 ### Structure
 
 ---
