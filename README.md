@@ -38,6 +38,12 @@ cargo asm 'mathlib::num::u256::U256::wrapping_add'
 ---
 - Implement `U256::full_mul`
 
+## Day 6
+
+---
+
+- [Karatsuba multiplication](https://en.wikipedia.org/wiki/Karatsuba_algorithm)
+
 ### Structure
 
 ---
