@@ -44,6 +44,14 @@ cargo asm 'mathlib::num::u256::U256::wrapping_add'
 
 - [Karatsuba multiplication](https://en.wikipedia.org/wiki/Karatsuba_algorithm)
 
+
+## Day 7
+
+---
+
+- [Montgomery modular multiplication](https://en.wikipedia.org/wiki/Montgomery_modular_multiplication)
+
+
 ### Structure
 
 ---
