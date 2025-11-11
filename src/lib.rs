@@ -1,4 +1,4 @@
 pub mod arch;
-pub mod field;
+pub mod core;
 pub mod num;
 pub mod poly;

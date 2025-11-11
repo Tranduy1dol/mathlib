@@ -1,3 +1,2 @@
-pub mod u128;
-pub mod u256;
-pub mod u512;
+pub mod int;
+pub mod prime_field;

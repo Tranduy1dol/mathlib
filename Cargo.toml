@@ -18,9 +18,5 @@ name = "branch_benchmark"
 harness = false
 
 [[bench]]
-name = "xor_benchmark"
-harness = false
-
-[[bench]]
-name = "mul_benchmark"
+name = "field_add_bench"
 harness = false

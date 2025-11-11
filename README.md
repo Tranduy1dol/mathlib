@@ -22,9 +22,7 @@
 ---
 - [`unsafe`](https://doc.rust-lang.org/nomicon/what-unsafe-does.html)
 - `overflow_add`, `overflow_sub` implementations for `U256` type.
-```
-cargo asm 'mathlib::num::u256::U256::wrapping_add'
-```
+- `cargo asm 'mathlib::num::u256::U256::wrapping_add'`
 
 ## Day 4
 
@@ -61,27 +59,27 @@ mathlib/
 ├── src/
 │   ├── lib.rs
 │   │
-│   ├── arch/
+│   ├── core/
 │   │   ├── mod.rs
-│   │   └── x86_64/
-│   │       ├── mod.rs
-│   │       └── avx2.rs
+│   │   ├── field.rs
+│   │   └── int.rs
 │   │
 │   ├── num/
 │   │   ├── mod.rs
-│   │   ├── u256.rs
-│   │   └── u512.rs
+│   │   ├── int/
+│   │   │   ├── mod.rs
+│   │   │   └── u256.rs
+│   │   │
+│   │   └── prime_field/
+│   │       ├── mod.rs
+│   │       └── field_element.rs
 │   │
-│   ├── field/
-│   │   ├── mod.rs
-│   │   └── montgomery.rs
-│   │
-│   └── poly/
+│   └── arch/
 │       ├── mod.rs
-│       ├── fft.rs
-│       └── ntt.rs
+│       └── x86_64/
+│           ├── mod.rs
+│           └── avx2.rs
 │
-├── benches/
-│       ├── branch_benchmark.rs
-│       └── layout_benchmark.rs
+└── benches/
+    └── field_add_bench.rs
 ```
