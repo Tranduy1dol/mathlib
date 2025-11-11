@@ -1,4 +1,7 @@
-use std::ops::{Add, BitXor, Mul, Sub};
+use std::{
+    fmt::{Display, Formatter},
+    ops::{Add, BitXor, Mul, Shl, Sub},
+};
 
 use crate::num::{u128::U128, u512::U512};
 
@@ -9,6 +12,54 @@ pub struct U256(pub [u64; 4]);
 impl U256 {
     pub const ZERO: Self = Self([0; 4]);
     pub const MAX: Self = Self([u64::MAX; 4]);
+
+    pub fn to_hex(&self) -> String {
+        if *self == U256::ZERO {
+            return "0x0".to_string();
+        }
+
+        let mut s = "0x".to_string();
+        let mut leading_zeros = true;
+        for &limb in self.0.iter().rev() {
+            if limb == 0 && leading_zeros {
+                continue;
+            }
+
+            if leading_zeros {
+                s.push_str(&format!("{:x}", limb));
+                leading_zeros = false;
+            } else {
+                s.push_str(&format!("{:016x}", limb));
+            }
+        }
+        s
+    }
+
+    pub fn from_hex(s: &str) -> Result<Self, &'static str> {
+        let s = s.strip_prefix("0x").unwrap_or(s);
+        if s.len() > 64 {
+            return Err("hex string is too long");
+        }
+
+        let mut limbs = [0u64; 4];
+        let mut s_index = s.len();
+        let mut limb_index = 0;
+
+        while s_index > 0 {
+            if limb_index > 3 {
+                return Err("hex string is too long");
+            }
+            let start = s_index.saturating_sub(16);
+            let chunk = &s[start..s_index];
+            let limb = u64::from_str_radix(chunk, 16).map_err(|_| "invalid hex character")?;
+            limbs[limb_index] = limb;
+
+            limb_index += 1;
+            s_index = start;
+        }
+
+        Ok(U256(limbs))
+    }
 
     pub fn mul_karatsuba(&self, rhs: &Self) -> U512 {
         let a_low = U128([self.0[0], self.0[1]]);
@@ -171,6 +222,39 @@ impl U256 {
     pub fn wrapping_sub(&self, rhs: &Self) -> Self {
         self.borrowing_sub(rhs).0
     }
+
+    fn div_rem(&self, divisor: u64) -> (Self, u64) {
+        if divisor == 0 {
+            panic!("division by zero");
+        }
+        let mut rem = 0u128;
+        let mut quotient = U256::ZERO;
+
+        for i in (0..4).rev() {
+            rem = (rem << 64) | (self.0[i] as u128);
+            quotient.0[i] = (rem / divisor as u128) as u64;
+            rem %= divisor as u128;
+        }
+
+        (quotient, rem as u64)
+    }
+}
+
+impl Display for U256 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if *self == U256::ZERO {
+            return write!(f, "0");
+        }
+
+        let mut s = String::new();
+        let mut current = *self;
+        while current != U256::ZERO {
+            let (next, rem) = current.div_rem(10);
+            s.push_str(&rem.to_string());
+            current = next;
+        }
+        write!(f, "{}", s.chars().rev().collect::<String>())
+    }
 }
 
 impl Add for U256 {
@@ -257,9 +341,68 @@ impl<'b> Mul<&'b U256> for &U256 {
     }
 }
 
+impl Shl<usize> for U256 {
+    type Output = Self;
+
+    fn shl(self, rhs: usize) -> Self::Output {
+        let mut result = U256::ZERO;
+        let word_shift = rhs / 64;
+        let bit_shift = rhs % 64;
+
+        for i in word_shift..4 {
+            result.0[i] = self.0[i - word_shift] << bit_shift;
+            if bit_shift > 0 && i > word_shift {
+                result.0[i] |= self.0[i - word_shift - 1] >> (64 - bit_shift);
+            }
+        }
+        result
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_to_hex() {
+        assert_eq!(U256::ZERO.to_hex(), "0x0");
+        assert_eq!(U256([1, 0, 0, 0]).to_hex(), "0x1");
+        assert_eq!(
+            U256([0, 0, 0, 1]).to_hex(),
+            "0x1000000000000000000000000000000000000000000000000"
+        );
+        assert_eq!(
+            U256::MAX.to_hex(),
+            "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        );
+    }
+
+    #[test]
+    fn test_from_hex() {
+        assert_eq!(U256::from_hex("0x0").unwrap(), U256::ZERO);
+        assert_eq!(U256::from_hex("1").unwrap(), U256([1, 0, 0, 0]));
+        assert_eq!(
+            U256::from_hex("1000000000000000000000000000000000000000000000000").unwrap(),
+            U256([0, 0, 0, 1])
+        );
+        assert_eq!(
+            U256::from_hex("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff")
+                .unwrap(),
+            U256::MAX
+        );
+        assert!(U256::from_hex("1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff").is_err());
+        assert!(U256::from_hex("invalid").is_err());
+    }
+
+    #[test]
+    fn test_display() {
+        assert_eq!(U256::ZERO.to_string(), "0");
+        assert_eq!(U256([1, 0, 0, 0]).to_string(), "1");
+        assert_eq!(
+            U256::MAX.to_string(),
+            "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+        );
+    }
 
     #[test]
     fn test_carrying_add() {
