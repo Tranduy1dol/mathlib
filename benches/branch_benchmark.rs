@@ -32,6 +32,27 @@ fn branchless_sum(data: &[u8]) -> u64 {
     sum
 }
 
+/// Benchmarks branchy and branchless summation implementations on both predictable (sorted)
+/// and unpredictable (shuffled) byte data to compare the effect of branch prediction.
+///
+/// The function prepares a shuffled byte buffer and a sorted clone, then measures
+/// four cases in a Criterion benchmark group named "Branch Prediction Comparison":
+/// branchy and branchless implementations on unsorted (unpredictable) and sorted
+/// (predictable) inputs.
+///
+/// # Examples
+///
+/// ```
+/// use criterion::{criterion_group, criterion_main, Criterion};
+///
+/// // Register the benchmark so Criterion can run it.
+/// criterion_group!(benches, branch_prediction_benchmark);
+/// criterion_main!(benches);
+/// ```
+///
+/// # Parameters
+///
+/// - `c`: Criterion benchmark context provided by the Criterion harness.
 fn branch_prediction_benchmark(c: &mut Criterion) {
     // --- Setup ---
     // Generate a vector of random data.
