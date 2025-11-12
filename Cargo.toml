@@ -20,3 +20,11 @@ harness = false
 [[bench]]
 name = "field_add_bench"
 harness = false
+
+[[bench]]
+name = "mul_bench"
+harness = false
+
+[[bench]]
+name = "xor_bench"
+harness = false
