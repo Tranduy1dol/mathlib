@@ -710,4 +710,9 @@ mod tests {
         let debug_str = format!("{:?}", a);
         assert!(debug_str.contains("U256"));
     }
+
+    #[test]
+    fn test_ci_workflow() {
+        println!("Github CI workflow test")
+    }
 }
