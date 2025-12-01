@@ -1,2 +1,2 @@
-mod element;
-mod montgomery;
+pub mod element;
+pub mod montgomery;
