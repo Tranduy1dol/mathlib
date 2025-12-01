@@ -37,6 +37,7 @@ proptest! {
         prop_assert_eq!(carry_our, expected_carry, "Carry flag mismatch");
     }
 
+    #[cfg(feature = "gmp")]
     #[test]
     fn test_mul_properties(a in arb_u1024(), b in arb_u1024()) {
         let (low, high) = a.full_mul(&b);

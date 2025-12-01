@@ -15,13 +15,19 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```rust,ignore
-    /// use crate::poly::dense::DensePolynomial;
-    /// use crate::field::FieldElement;
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::U1024;
+    /// use mathlib::traits::BigInt;
     ///
     /// // Create a polynomial and have trailing zero coefficients trimmed
-    /// let coeffs = vec![ /* FieldElement instances */ ];
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let coeffs = vec![FieldElement::one(&params), FieldElement::zero(&params)];
     /// let poly = DensePolynomial::new(coeffs);
+    /// assert_eq!(poly.coeffs.len(), 1);
     /// ```
     pub fn new(coeffs: Vec<FieldElement<'a>>) -> Self {
         let mut poly = Self { coeffs };
@@ -37,13 +43,21 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::U1024;
+    /// use mathlib::traits::BigInt;
+    ///
     /// // Given a polynomial constructed with trailing zero field elements,
     /// // constructing via `DensePolynomial::new` will result in those trailing
     /// // zeros being removed (internally by `trim`).
-    /// let p = DensePolynomial::new(vec![/* nonzero */]);
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let p = DensePolynomial::new(vec![FieldElement::one(&params), FieldElement::zero(&params)]);
     /// // trailing zero coefficients are removed so the length is shorter than input
-    /// assert!(p.coeffs.len() < 3);
+    /// assert!(p.coeffs.len() < 2);
     /// ```
     fn trim(&mut self) {
         while let Some(c) = self.coeffs.last() {
@@ -62,7 +76,9 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    ///
     /// let p = DensePolynomial::zero();
     /// assert!(p.coeffs.is_empty());
     /// ```
@@ -76,16 +92,24 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::U1024;
+    /// use mathlib::traits::BigInt;
+    ///
     /// // Construct a polynomial p(x) = 3 + 2*x + 1*x^2 (coeffs are [3, 2, 1])
-    /// // let params = /* field parameters */;
-    /// // let three = FieldElement::from_u64(3, params);
-    /// // let two = FieldElement::from_u64(2, params);
-    /// // let one = FieldElement::from_u64(1, params);
-    /// // let x = FieldElement::from_u64(5, params);
-    /// // let p = DensePolynomial::new(vec![three, two, one]);
-    /// // let y = p.evaluate(&x);
-    /// // assert_eq!(y, /* expected FieldElement value */);
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let three = FieldElement::new(U1024::from_u64(3), &params);
+    /// let two = FieldElement::new(U1024::from_u64(2), &params);
+    /// let one = FieldElement::new(U1024::from_u64(1), &params);
+    /// let x = FieldElement::new(U1024::from_u64(5), &params);
+    /// let p = DensePolynomial::new(vec![three, two, one]);
+    /// let y = p.evaluate(&x);
+    /// // 3 + 2*5 + 1*5^2 = 3 + 10 + 25 = 38 = 4 mod 17
+    /// assert_eq!(y.to_u1024(), U1024::from_u64(4));
     /// ```
     pub fn evaluate(&self, x: &FieldElement<'a>) -> FieldElement<'a> {
         if self.coeffs.is_empty() {
@@ -113,8 +137,8 @@ impl<'a> Add for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
-    /// use crate::poly::dense::DensePolynomial;
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
     ///
     /// let a = DensePolynomial::zero();
     /// let b = DensePolynomial::zero();
@@ -154,12 +178,23 @@ impl<'a> Mul for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
-    /// # use crate::poly::DensePolynomial;
-    /// # use crate::field::FieldElement;
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::U1024;
+    /// use mathlib::traits::BigInt;
+    ///
     /// // (1 + 2x) * (3 + 4x) = 3 + 10x + 8x^2
-    /// let a = DensePolynomial::new(vec![FieldElement::from(1u64), FieldElement::from(2u64)]);
-    /// let b = DensePolynomial::new(vec![FieldElement::from(3u64), FieldElement::from(4u64)]);
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let one = FieldElement::new(U1024::from_u64(1), &params);
+    /// let two = FieldElement::new(U1024::from_u64(2), &params);
+    /// let three = FieldElement::new(U1024::from_u64(3), &params);
+    /// let four = FieldElement::new(U1024::from_u64(4), &params);
+    ///
+    /// let a = DensePolynomial::new(vec![one, two]);
+    /// let b = DensePolynomial::new(vec![three, four]);
     /// let c = a * b;
     /// assert_eq!(c.coeffs.len(), 3);
     /// ```
@@ -190,8 +225,10 @@ impl<'a> fmt::Debug for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```ignore
-    /// let p = DensePolynomial::zero::<_>();
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    ///
+    /// let p = DensePolynomial::zero();
     /// let s = format!("{:?}", p);
     /// assert!(s.starts_with("Poly"));
     /// ```

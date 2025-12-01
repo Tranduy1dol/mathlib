@@ -52,7 +52,7 @@ impl U1024 {
         }
     }
 
-    pub fn full_mul(&self, _rhs: &Self) -> (Self, Self) {
+    pub fn full_mul(&self, rhs: &Self) -> (Self, Self) {
         #[cfg(feature = "gmp")]
         {
             let mut res_buffer = [0u64; LIMBS * 2];
@@ -61,7 +61,7 @@ impl U1024 {
                 gmp::__gmpn_mul_n(
                     res_buffer.as_mut_ptr(),
                     self.0.as_ptr(),
-                    _rhs.0.as_ptr(),
+                    rhs.0.as_ptr(),
                     LIMBS as c_long,
                 );
             }
@@ -76,7 +76,7 @@ impl U1024 {
         }
 
         #[cfg(not(feature = "gmp"))]
-        unimplemented!("U1024::full_mul requires the gmp feature");
+        native::mul(self, rhs)
     }
 
     pub fn div_rem(&self, _modulus: &Self) -> (Self, Self) {
@@ -207,6 +207,7 @@ impl BitXor for U1024 {
     type Output = Self;
     fn bitxor(self, rhs: Self) -> Self {
         #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        #[cfg(feature = "avx2")]
         {
             if is_x86_feature_detected!("avx2") {
                 unsafe {
