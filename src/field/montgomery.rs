@@ -9,6 +9,17 @@ pub struct MontgomeryParams {
 }
 
 impl MontgomeryParams {
+    /// Constructs MontgomeryParams for the given field modulus, precomputing
+    /// the Montgomery constant n' and the value R^2 mod modulus used for Montgomery arithmetic.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// // Construct parameters for modulus 3 (assuming `U1024::from` is available)
+    /// let m = U1024::from(3u64);
+    /// let params = MontgomeryParams::new(m.clone());
+    /// assert_eq!(params.modulus, m);
+    /// ```
     pub fn new(modulus: U1024) -> Self {
         let n_prime = Self::compute_n_prime(&modulus);
         let r2 = Self::compute_r2(&modulus);
@@ -20,6 +31,19 @@ impl MontgomeryParams {
         }
     }
 
+    /// Computes the Montgomery n' value for a modulus: the value `n_prime` satisfying
+    /// `modulus * n_prime ≡ -1 (mod 2^1024)`.
+    ///
+    /// The modulus must be odd for an inverse modulo 2^k to exist; behavior for even
+    /// modulus is undefined.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let m = U1024::from_u64(3);
+    /// let n_prime = compute_n_prime(&m);
+    /// let _ = n_prime; // n_prime can now be used in Montgomery reduction
+    /// ```
     fn compute_n_prime(modulus: &U1024) -> U1024 {
         let mut inv = 1u64;
         let p0 = modulus.0[0];
@@ -44,6 +68,18 @@ impl MontgomeryParams {
         neg_inv
     }
 
+    /// Computes R^2 modulo `modulus`, where R = 2^1024.
+    ///
+    /// The returned value equals 2^2048 mod `modulus`, represented as a `U1024`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let m = U1024::from(3u64);
+    /// let r2 = compute_r2(&m);
+    /// // 2^2048 mod 3 == 1
+    /// assert_eq!(r2, U1024::one());
+    /// ```
     fn compute_r2(modulus: &U1024) -> U1024 {
         let mut acc = U1024::one();
 
@@ -61,6 +97,22 @@ impl MontgomeryParams {
         acc
     }
 
+    /// Reduces a 2048-bit value represented by (`hi`, `lo`) to a canonical 1024-bit residue modulo `self.modulus` using Montgomery reduction.
+    ///
+    /// `lo` is the low 1024 bits and `hi` is the high 1024 bits of the 2048-bit integer to reduce. The method uses `self.n_prime` and `self.modulus` to compute the Montgomery reduction and returns the resulting value in the range [0, modulus).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let params = MontgomeryParams {
+    ///     modulus: U1024::one(),
+    ///     r2: U1024::one(),
+    ///     n_prime: U1024::one(),
+    /// };
+    /// let lo = U1024::zero();
+    /// let hi = U1024::zero();
+    /// assert_eq!(params.reduce(&lo, &hi), U1024::zero());
+    /// ```
     #[inline]
     pub fn reduce(&self, lo: &U1024, hi: &U1024) -> U1024 {
         let m = (*lo) * self.n_prime;
