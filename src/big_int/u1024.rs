@@ -4,11 +4,18 @@ use std::ops::{Add, BitXor, Mul, Sub};
 #[cfg(feature = "gmp")]
 use libc::c_long;
 
+#[cfg(feature = "avx2")]
+use crate::avx2;
+
 #[cfg(feature = "gmp")]
 use crate::big_int::backend::gmp;
+
+#[cfg(not(feature = "gmp"))]
+use crate::native;
+
 use crate::traits::BigInt;
 
-const LIMBS: usize = 16;
+pub(crate) const LIMBS: usize = 16;
 
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -45,7 +52,7 @@ impl U1024 {
         }
     }
 
-    pub fn full_mul(&self, _rhs: &Self) -> (Self, Self) {
+    pub fn full_mul(&self, rhs: &Self) -> (Self, Self) {
         #[cfg(feature = "gmp")]
         {
             let mut res_buffer = [0u64; LIMBS * 2];
@@ -54,7 +61,7 @@ impl U1024 {
                 gmp::__gmpn_mul_n(
                     res_buffer.as_mut_ptr(),
                     self.0.as_ptr(),
-                    _rhs.0.as_ptr(),
+                    rhs.0.as_ptr(),
                     LIMBS as c_long,
                 );
             }
@@ -69,7 +76,7 @@ impl U1024 {
         }
 
         #[cfg(not(feature = "gmp"))]
-        unimplemented!("U1024::full_mul requires the gmp feature");
+        native::mul(self, rhs)
     }
 
     pub fn div_rem(&self, _modulus: &Self) -> (Self, Self) {
@@ -143,7 +150,7 @@ impl BigInt for U1024 {
         return self.gmp_add(rhs);
 
         #[cfg(not(feature = "gmp"))]
-        unimplemented!("Native rust backend not implemented yet");
+        return native::add(self, rhs);
     }
 
     fn borrowing_sub(&self, rhs: &Self) -> (Self, bool) {
@@ -151,10 +158,20 @@ impl BigInt for U1024 {
         return self.gmp_sub(rhs);
 
         #[cfg(not(feature = "gmp"))]
-        unimplemented!("Native rust backend not implemented yet");
+        return native::sub(self, rhs);
     }
 
     fn conditional_select(a: &Self, b: &Self, choice: bool) -> Self {
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        #[cfg(feature = "avx2")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    return avx2::conditional_select(a, b, choice);
+                }
+            }
+        }
+
         let mut res = U1024([0; LIMBS]);
         let mask = if choice { u64::MAX } else { 0 };
         for i in 0..LIMBS {
@@ -188,8 +205,23 @@ impl Mul for U1024 {
 
 impl BitXor for U1024 {
     type Output = Self;
-    fn bitxor(self, _rhs: Self) -> Self {
-        unimplemented!("BitXor implemented in Day 4")
+    fn bitxor(self, rhs: Self) -> Self {
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        #[cfg(feature = "avx2")]
+        {
+            if is_x86_feature_detected!("avx2") {
+                unsafe {
+                    return avx2::xor(&self, &rhs);
+                }
+            }
+        }
+
+        // Native XOR
+        let mut res = U1024::zero();
+        for i in 0..LIMBS {
+            res.0[i] = self.0[i] ^ rhs.0[i];
+        }
+        res
     }
 }
 

@@ -5,11 +5,8 @@ edition = "2024"
 
 [dependencies]
 libc = "0.2"
-cfg-if = "1.0"
-rand = "0.8"
 
 [build-dependencies]
-cc = "1.0"
 pkg-config = "0.3"
 
 [dev-dependencies]
@@ -19,7 +16,10 @@ num-traits = "0.2"
 proptest = "1.4"
 
 [features]
-default = ["gmp"]
-std = []
+default = ["avx2", "gmp"]
 gmp = []
 avx2 = []
+
+[[bench]]
+name = "math_bench"
+harness = false

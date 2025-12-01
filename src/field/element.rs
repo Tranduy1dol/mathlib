@@ -12,19 +12,23 @@ pub struct FieldElement<'a> {
 }
 
 impl<'a> FieldElement<'a> {
-    /// Constructs a FieldElement by converting a standard integer into Montgomery form.
+    /// Constructs a FieldElement by converting a standard integer into a Montgomery form.
     ///
     /// The provided `value` is mapped into the field's Montgomery representation using the
-    /// supplied Montgomery parameters so the returned element is ready for Montgomery arithmetic.
+    /// supplied Montgomery parameters, so the returned element is ready for Montgomery arithmetic.
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// # use crate::field::{FieldElement, MontgomeryParams};
-    /// # use crate::u1024::U1024;
+    /// ```
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
     /// // `params` should be initialized for the desired modulus.
-    /// let params: MontgomeryParams = /* initialize Montgomery parameters */ todo!();
-    /// let value = U1024::from(42u64);
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let value = U1024::from_u64(42);
     /// let fe = FieldElement::new(value, &params);
     /// ```
     pub fn new(value: U1024, params: &'a MontgomeryParams) -> Self {
@@ -46,7 +50,14 @@ impl<'a> FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // `mont_val` is a U1024 holding a Montgomery-form value and `params` are MontgomeryParams.
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let mont_val = U1024::from_u64(5);
     /// let fe = FieldElement::from_montgomery(mont_val, &params);
     /// assert_eq!(fe.value, mont_val);
     /// assert_eq!(fe.params as *const _, &params as *const _);
@@ -60,8 +71,14 @@ impl<'a> FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // `params` is a `&MontgomeryParams` available in scope.
-    /// let z = FieldElement::zero(params);
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let z = FieldElement::zero(&params);
     /// assert_eq!(z.to_u1024(), U1024::zero());
     /// ```
     pub fn zero(params: &'a MontgomeryParams) -> Self {
@@ -78,7 +95,13 @@ impl<'a> FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // `params` should be a valid `MontgomeryParams` for the field.
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
     /// let one = FieldElement::one(&params);
     /// assert_eq!(one.to_u1024(), U1024::one());
     /// ```
@@ -94,10 +117,14 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// # use crate::{FieldElement, MontgomeryParams, U1024};
-    /// // `params` must be constructed for the field before use.
-    /// let params: MontgomeryParams = /* ... */ unimplemented!();
+    /// ```
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
     /// let elem = FieldElement::one(&params);
     /// let canonical: U1024 = elem.to_u1024();
     /// ```
@@ -115,11 +142,18 @@ impl<'a> Add for FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // assuming `params` and `U1024` are available in scope
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
     /// let a = FieldElement::zero(&params);
     /// let b = FieldElement::one(&params);
     /// let c = a + b;
-    /// assert_eq!(c.to_u1024(), (a.to_u1024() + b.to_u1024()) % params.modulus);
+    /// // (0 + 1) mod 17 = 1
+    /// assert_eq!(c.to_u1024(), U1024::one());
     /// ```
     fn add(self, rhs: Self) -> Self {
         let (sum, carry) = self.value.carrying_add(&rhs.value);
@@ -144,17 +178,17 @@ impl<'a> Sub for FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // given `a`, `b` of type `FieldElement` with the same `params`
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let a = FieldElement::one(&params);
+    /// let b = FieldElement::zero(&params);
     /// let c = a - b;
-    /// // `c` is the Montgomery-form representation of (a - b) mod modulus
-    /// assert_eq!(c.to_u1024(), {
-    ///     // canonical check: convert operands out of Montgomery form, do integer subtraction modulo modulus
-    ///     let av = a.to_u1024();
-    ///     let bv = b.to_u1024();
-    ///     let modulus = a.params.modulus;
-    ///     let diff = if av >= bv { av - bv } else { av + modulus - bv };
-    ///     diff
-    /// });
+    /// assert_eq!(c.to_u1024(), U1024::one());
     /// ```
     fn sub(self, rhs: Self) -> Self {
         let (diff, borrow) = self.value.borrowing_sub(&rhs.value);
@@ -174,12 +208,15 @@ impl<'a> Mul for FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// # use crate::field::element::FieldElement;
-    /// # use crate::field::montgomery::MontgomeryParams;
-    /// # // Setup (hidden): construct MontgomeryParams and two elements in Montgomery form.
-    /// # let params = unsafe { MontgomeryParams::example() }; // example constructor hidden
-    /// # let a = FieldElement::one(&params);
-    /// # let b = FieldElement::one(&params);
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let a = FieldElement::one(&params);
+    /// let b = FieldElement::one(&params);
     /// let c = a * b;
     /// assert_eq!(c, FieldElement::one(&params));
     /// ```
@@ -203,8 +240,15 @@ impl<'a> fmt::Debug for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
-    /// // Given a `FieldElement` `fe`, the debug output includes the canonical value.
+    /// ```
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
+    /// let fe = FieldElement::one(&params);
     /// let s = format!("{:?}", fe);
     /// assert!(s.starts_with("FieldElement("));
     /// ```
@@ -222,8 +266,13 @@ impl<'a> PartialEq for FieldElement<'a> {
     /// # Examples
     ///
     /// ```
-    /// // Construct two field elements with the same Montgomery representation.
-    /// let params = /* MontgomeryParams for the field */;
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus);
     /// let a = FieldElement::zero(&params);
     /// let b = FieldElement::zero(&params);
     /// assert_eq!(a, b);
