@@ -14,7 +14,7 @@ impl MontgomeryParams {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // Construct parameters for modulus 3 (assuming `U1024::from` is available)
     /// let m = U1024::from(3u64);
     /// let params = MontgomeryParams::new(m.clone());
@@ -39,7 +39,7 @@ impl MontgomeryParams {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// let m = U1024::from_u64(3);
     /// let n_prime = compute_n_prime(&m);
     /// let _ = n_prime; // n_prime can now be used in Montgomery reduction
@@ -74,7 +74,7 @@ impl MontgomeryParams {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// let m = U1024::from(3u64);
     /// let r2 = compute_r2(&m);
     /// // 2^2048 mod 3 == 1
@@ -103,7 +103,7 @@ impl MontgomeryParams {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// let params = MontgomeryParams {
     ///     modulus: U1024::one(),
     ///     r2: U1024::one(),

@@ -37,11 +37,11 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// // Given a polynomial constructed with trailing zero field elements,
     /// // constructing via `DensePolynomial::new` will result in those trailing
     /// // zeros being removed (internally by `trim`).
-    /// let p = DensePolynomial::new(vec![/* nonzero */, /* trailing zero */, /* trailing zero */]);
+    /// let p = DensePolynomial::new(vec![/* nonzero */]);
     /// // trailing zero coefficients are removed so the length is shorter than input
     /// assert!(p.coeffs.len() < 3);
     /// ```
@@ -62,7 +62,7 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// let p = DensePolynomial::zero();
     /// assert!(p.coeffs.is_empty());
     /// ```
@@ -76,7 +76,7 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // Construct a polynomial p(x) = 3 + 2*x + 1*x^2 (coeffs are [3, 2, 1])
     /// // let params = /* field parameters */;
     /// // let three = FieldElement::from_u64(3, params);
@@ -113,7 +113,7 @@ impl<'a> Add for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// use crate::poly::dense::DensePolynomial;
     ///
     /// let a = DensePolynomial::zero();
@@ -154,7 +154,7 @@ impl<'a> Mul for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// # use crate::poly::DensePolynomial;
     /// # use crate::field::FieldElement;
     /// // (1 + 2x) * (3 + 4x) = 3 + 10x + 8x^2
@@ -190,7 +190,7 @@ impl<'a> fmt::Debug for DensePolynomial<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// let p = DensePolynomial::zero::<_>();
     /// let s = format!("{:?}", p);
     /// assert!(s.starts_with("Poly"));

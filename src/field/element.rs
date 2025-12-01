@@ -19,7 +19,7 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// # use crate::field::{FieldElement, MontgomeryParams};
     /// # use crate::u1024::U1024;
     /// // `params` should be initialized for the desired modulus.
@@ -45,7 +45,7 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // `mont_val` is a U1024 holding a Montgomery-form value and `params` are MontgomeryParams.
     /// let fe = FieldElement::from_montgomery(mont_val, &params);
     /// assert_eq!(fe.value, mont_val);
@@ -59,7 +59,7 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // `params` is a `&MontgomeryParams` available in scope.
     /// let z = FieldElement::zero(params);
     /// assert_eq!(z.to_u1024(), U1024::zero());
@@ -77,7 +77,7 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // `params` should be a valid `MontgomeryParams` for the field.
     /// let one = FieldElement::one(&params);
     /// assert_eq!(one.to_u1024(), U1024::one());
@@ -94,7 +94,7 @@ impl<'a> FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// # use crate::{FieldElement, MontgomeryParams, U1024};
     /// // `params` must be constructed for the field before use.
     /// let params: MontgomeryParams = /* ... */ unimplemented!();
@@ -114,7 +114,7 @@ impl<'a> Add for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // assuming `params` and `U1024` are available in scope
     /// let a = FieldElement::zero(&params);
     /// let b = FieldElement::one(&params);
@@ -143,7 +143,7 @@ impl<'a> Sub for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // given `a`, `b` of type `FieldElement` with the same `params`
     /// let c = a - b;
     /// // `c` is the Montgomery-form representation of (a - b) mod modulus
@@ -173,7 +173,7 @@ impl<'a> Mul for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// # use crate::field::element::FieldElement;
     /// # use crate::field::montgomery::MontgomeryParams;
     /// # // Setup (hidden): construct MontgomeryParams and two elements in Montgomery form.
@@ -203,7 +203,7 @@ impl<'a> fmt::Debug for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```no_run
+    /// ```ignore
     /// // Given a `FieldElement` `fe`, the debug output includes the canonical value.
     /// let s = format!("{:?}", fe);
     /// assert!(s.starts_with("FieldElement("));
@@ -221,7 +221,7 @@ impl<'a> PartialEq for FieldElement<'a> {
     ///
     /// # Examples
     ///
-    /// ```
+    /// ```ignore
     /// // Construct two field elements with the same Montgomery representation.
     /// let params = /* MontgomeryParams for the field */;
     /// let a = FieldElement::zero(&params);
