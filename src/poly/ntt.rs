@@ -1,5 +1,6 @@
 use crate::field::constants::get_params;
 use crate::field::element::FieldElement;
+use crate::{BigInt, U1024};
 
 pub fn bit_reverse(coeffs: &mut [FieldElement]) {
     let n = coeffs.len();
@@ -47,5 +48,22 @@ pub fn ntt(coeffs: &mut [FieldElement]) {
             }
         }
         len <<= 1;
+    }
+}
+
+pub fn intt(coeffs: &mut [FieldElement]) {
+    let n = coeffs.len();
+
+    ntt(coeffs);
+
+    coeffs[1..].reverse();
+
+    let params = coeffs[0].params;
+    let n_val = U1024::from_u64(n as u64);
+    let n_elem = FieldElement::new(n_val, params);
+    let n_inv = n_elem.inv();
+
+    for c in coeffs.iter_mut() {
+        *c = *c * n_inv;
     }
 }
