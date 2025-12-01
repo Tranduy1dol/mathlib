@@ -22,3 +22,20 @@ fn test_gmp_overflow() {
     assert_eq!(c.0[1], 1);
     assert_eq!(carry, false);
 }
+
+#[test]
+fn test_gmp_mul() {
+    // 2^64
+    let mut a = U1024::zero();
+    a.0[1] = 1;
+
+    // 2^64
+    let mut b = U1024::zero();
+    b.0[1] = 1;
+
+    // a * b = 2^128.
+    let (low, high) = a.full_mul(&b);
+
+    assert_eq!(low.0[2], 1);
+    assert_eq!(high, U1024::zero());
+}

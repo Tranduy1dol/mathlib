@@ -1,2 +1,2 @@
-pub mod ntt;
 pub mod dense;
+pub mod ntt;

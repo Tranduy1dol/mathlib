@@ -19,7 +19,7 @@ num-traits = "0.2"
 proptest = "1.4"
 
 [features]
-default = ["std"]
+default = ["gmp"]
 std = []
 gmp = []
 avx2 = []

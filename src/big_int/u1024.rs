@@ -44,6 +44,47 @@ impl U1024 {
             (result, borrow != 0)
         }
     }
+
+    pub fn full_mul(&self, rhs: &Self) -> (Self, Self) {
+        let mut res_buffer = [0u64; LIMBS * 2];
+
+        unsafe {
+            #[cfg(feature = "gmp")]
+            gmp::__gmpn_mul_n(
+                res_buffer.as_mut_ptr(),
+                self.0.as_ptr(),
+                rhs.0.as_ptr(),
+                LIMBS as c_ulong,
+            );
+        }
+
+        let mut low = U1024([0; LIMBS]);
+        let mut high = U1024([0; LIMBS]);
+
+        low.0.copy_from_slice(&res_buffer[0..LIMBS]);
+        high.0.copy_from_slice(&res_buffer[LIMBS..LIMBS * 2]);
+
+        (low, high)
+    }
+
+    pub fn div_rem(&self, modulus: &Self) -> (Self, Self) {
+        let mut q = U1024::zero();
+        let mut r = U1024::zero();
+
+        unsafe {
+            #[cfg(feature = "gmp")]
+            gmp::__gmpn_tdiv_qr(
+                q.0.as_mut_ptr(),
+                r.0.as_mut_ptr(),
+                0,
+                self.0.as_ptr(),
+                LIMBS as c_ulong,
+                modulus.0.as_ptr(),
+                LIMBS as c_ulong,
+            );
+        }
+        (q, r)
+    }
 }
 
 impl BigInt for U1024 {
@@ -107,8 +148,9 @@ impl Sub for U1024 {
 
 impl Mul for U1024 {
     type Output = Self;
-    fn mul(self, _rhs: Self) -> Self {
-        unimplemented!("Mul implemented in Day 2")
+    fn mul(self, rhs: Self) -> Self {
+        let (low, _) = self.full_mul(&rhs);
+        low
     }
 }
 
