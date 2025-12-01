@@ -5,13 +5,17 @@ edition = "2024"
 
 [dependencies]
 libc = "0.2"
+cfg-if = "1.0"
+rand = "0.8"
+num-integer = "0.1.46"
+num-bigint = { version = "0.4.6", features = ["rand"]}
+
 
 [build-dependencies]
 pkg-config = "0.3"
 
 [dev-dependencies]
 criterion = "0.5"
-num-bigint = "0.4"
 num-traits = "0.2"
 proptest = "1.4"
 

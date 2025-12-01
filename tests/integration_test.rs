@@ -45,23 +45,24 @@ fn test_gmp_mul() {
 fn test_full_flow() {
     let mut p = U1024::zero();
     p.0[0] = 17;
-    let params = MontgomeryParams::new(p);
+
+    let params = MontgomeryParams::new(p, U1024::zero());
 
     let a = FieldElement::new(U1024::from_u64(5), &params);
     let b = FieldElement::new(U1024::from_u64(7), &params);
+    let prod = a * b;
 
-    let prod = a.clone() * b.clone();
-    assert_eq!(prod.to_u1024().0[0], 1);
+    assert_eq!(prod.to_u1024().0[0], 1, "Multiplication failed");
     println!("5 * 7 mod 17 = {:?}", prod);
 
-    let c3 = FieldElement::new(U1024::from_u64(3), &params);
-    let c2 = FieldElement::new(U1024::from_u64(2), &params);
+    let c3 = FieldElement::new(U1024::from_u64(3), &params); // Hệ số tự do (bậc 0)
+    let c2 = FieldElement::new(U1024::from_u64(2), &params); // Hệ số bậc 1
 
-    let poly = DensePolynomial::new(vec![c3.clone(), c2.clone()]);
+    let poly = DensePolynomial::new(vec![c3, c2]);
 
     let x = FieldElement::new(U1024::from_u64(4), &params);
     let eval = poly.evaluate(&x);
 
-    assert_eq!(eval.to_u1024().0[0], 11);
-    println!("P(x) = 2x + 3 at x=4 is {:?}", eval);
+    assert_eq!(eval.to_u1024().0[0], 11, "Poly eval failed");
+    println!("P(x) = 3 + 2x at x=4 is {:?}", eval);
 }

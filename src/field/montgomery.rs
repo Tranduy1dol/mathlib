@@ -1,16 +1,36 @@
 use crate::U1024;
 use crate::traits::BigInt;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+/// Montgomery parameters for efficient modular arithmetic in a prime field.
+///
+/// This struct holds precomputed values needed for Montgomery reduction,
+/// which enables fast modular multiplication without expensive division operations.
+///
+/// # Fields
+///
+/// - `modulus`: The prime field modulus P
+/// - `r2`: R^2 mod P, where R = 2^1024, used for converting to Montgomery form
+/// - `n_prime`: Montgomery constant satisfying P * n' ≡ -1 (mod 2^1024)
+/// - `root_of_unity`: A primitive root of unity in the field, used for NTT operations
+#[derive(Clone, Debug, PartialEq, Eq, Copy)]
 pub struct MontgomeryParams {
     pub modulus: U1024,
     pub r2: U1024,
     pub n_prime: U1024,
+    pub root_of_unity: U1024,
 }
 
 impl MontgomeryParams {
-    /// Constructs MontgomeryParams for the given field modulus, precomputing
-    /// the Montgomery constant n' and the value R^2 mod modulus used for Montgomery arithmetic.
+    /// Constructs MontgomeryParams for the given field modulus and root of unity.
+    ///
+    /// This function precomputes the Montgomery constant n' and the value R^2 mod modulus
+    /// needed for efficient Montgomery arithmetic. The root of unity is stored for use in
+    /// Number Theoretic Transform (NTT) operations.
+    ///
+    /// # Arguments
+    ///
+    /// * `modulus` - The prime field modulus P
+    /// * `root_of_unity` - A primitive root of unity in the field (typically W where W^n = 1 mod P)
     ///
     /// # Examples
     ///
@@ -19,12 +39,14 @@ impl MontgomeryParams {
     /// use mathlib::field::montgomery::MontgomeryParams;
     /// use mathlib::traits::BigInt;
     ///
-    /// // Construct parameters for modulus 3
-    /// let m = U1024::from_u64(3);
-    /// let params = MontgomeryParams::new(m.clone());
+    /// // Construct parameters for modulus 17 with root of unity 3
+    /// let m = U1024::from_u64(17);
+    /// let w = U1024::from_u64(3);
+    /// let params = MontgomeryParams::new(m.clone(), w);
     /// assert_eq!(params.modulus, m);
+    /// assert_eq!(params.root_of_unity, w);
     /// ```
-    pub fn new(modulus: U1024) -> Self {
+    pub fn new(modulus: U1024, root_of_unity: U1024) -> Self {
         let n_prime = Self::compute_n_prime(&modulus);
         let r2 = Self::compute_r2(&modulus);
 
@@ -32,6 +54,7 @@ impl MontgomeryParams {
             modulus,
             r2,
             n_prime,
+            root_of_unity,
         }
     }
 
@@ -124,6 +147,7 @@ impl MontgomeryParams {
     ///     modulus: U1024::one(),
     ///     r2: U1024::one(),
     ///     n_prime: U1024::one(),
+    ///     root_of_unity: U1024::one(),
     /// };
     /// let lo = U1024::zero();
     /// let hi = U1024::zero();

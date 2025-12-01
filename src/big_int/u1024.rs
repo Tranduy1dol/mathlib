@@ -22,6 +22,29 @@ pub(crate) const LIMBS: usize = 16;
 pub struct U1024(pub [u64; LIMBS]);
 
 impl U1024 {
+    pub fn from_hex(hex: &str) -> Self {
+        let hex = hex.trim_start_matches("0x");
+        assert!(hex.len() <= 256, "Hex string too long for U1024");
+
+        let mut res = U1024::zero();
+        let mut limb_idx = 0;
+        let mut char_idx = hex.len();
+
+        while char_idx > 0 {
+            let start = char_idx.saturating_sub(16);
+            let chunk = &hex[start..char_idx];
+
+            let val = u64::from_str_radix(chunk, 16).expect("Invalid hex character");
+
+            if limb_idx < LIMBS {
+                res.0[limb_idx] = val;
+            }
+            limb_idx += 1;
+            char_idx = start;
+        }
+        res
+    }
+
     #[cfg(feature = "gmp")]
     #[inline(always)]
     fn gmp_add(&self, rhs: &Self) -> (Self, bool) {

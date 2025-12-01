@@ -5,7 +5,7 @@ use crate::U1024;
 use crate::field::montgomery::MontgomeryParams;
 use crate::traits::BigInt;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub struct FieldElement<'a> {
     pub value: U1024,
     pub params: &'a MontgomeryParams,
@@ -27,7 +27,8 @@ impl<'a> FieldElement<'a> {
     ///
     /// // `params` should be initialized for the desired modulus.
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let root = U1024::from_u64(2);
+    /// let params = MontgomeryParams::new(modulus, root);
     /// let value = U1024::from_u64(42);
     /// let fe = FieldElement::new(value, &params);
     /// ```
@@ -56,7 +57,7 @@ impl<'a> FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let mont_val = U1024::from_u64(5);
     /// let fe = FieldElement::from_montgomery(mont_val, &params);
     /// assert_eq!(fe.value, mont_val);
@@ -77,7 +78,7 @@ impl<'a> FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let z = FieldElement::zero(&params);
     /// assert_eq!(z.to_u1024(), U1024::zero());
     /// ```
@@ -101,7 +102,7 @@ impl<'a> FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let one = FieldElement::one(&params);
     /// assert_eq!(one.to_u1024(), U1024::one());
     /// ```
@@ -124,7 +125,7 @@ impl<'a> FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let elem = FieldElement::one(&params);
     /// let canonical: U1024 = elem.to_u1024();
     /// ```
@@ -148,7 +149,7 @@ impl<'a> Add for FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let a = FieldElement::zero(&params);
     /// let b = FieldElement::one(&params);
     /// let c = a + b;
@@ -184,7 +185,7 @@ impl<'a> Sub for FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let a = FieldElement::one(&params);
     /// let b = FieldElement::zero(&params);
     /// let c = a - b;
@@ -214,7 +215,7 @@ impl<'a> Mul for FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let a = FieldElement::one(&params);
     /// let b = FieldElement::one(&params);
     /// let c = a * b;
@@ -247,7 +248,7 @@ impl<'a> fmt::Debug for FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let fe = FieldElement::one(&params);
     /// let s = format!("{:?}", fe);
     /// assert!(s.starts_with("FieldElement("));
@@ -272,7 +273,7 @@ impl<'a> PartialEq for FieldElement<'a> {
     /// use mathlib::traits::BigInt;
     ///
     /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
     /// let a = FieldElement::zero(&params);
     /// let b = FieldElement::zero(&params);
     /// assert_eq!(a, b);
