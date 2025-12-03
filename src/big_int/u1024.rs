@@ -22,6 +22,27 @@ pub(crate) const LIMBS: usize = 16;
 pub struct U1024(pub [u64; LIMBS]);
 
 impl U1024 {
+    /// Report whether the bit at the given zero-based index is set.
+    ///
+    /// The index 0 refers to the least-significant bit of the value; valid indexes are 0 through 1023.
+    /// If `index >= 1024`, the function returns `false`.
+    ///
+    /// # Parameters
+    ///
+    /// - `index`: zero-based bit index where 0 is the least-significant bit.
+    ///
+    /// # Returns
+    ///
+    /// `true` if the specified bit is 1, `false` otherwise (also `false` for indexes >= 1024).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let v = U1024::from_u64(0b10);
+    /// assert!(!v.bit(0));
+    /// assert!(v.bit(1));
+    /// assert!(!v.bit(1024)); // out-of-range
+    /// ```
     pub fn bit(&self, index: usize) -> bool {
         if index >= 1024 {
             return false;
@@ -33,6 +54,23 @@ impl U1024 {
         (self.0[limb_idx] >> bit_idx) & 1 == 1
     }
 
+    /// Compute the bit length of the value.
+    ///
+    /// Scans limbs from most-significant to least-significant and returns the index
+    /// of the highest set bit plus one. Returns `0` if the value is zero.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let v = U1024::from_u64(0);
+    /// assert_eq!(v.bits(), 0);
+    ///
+    /// let v = U1024::from_u64(1);
+    /// assert_eq!(v.bits(), 1);
+    ///
+    /// let v = U1024::from_u64(0x10);
+    /// assert_eq!(v.bits(), 5);
+    /// ```
     pub fn bits(&self) -> usize {
         for (i, limb) in self.0.iter().enumerate().rev() {
             if *limb != 0 {
@@ -42,6 +80,24 @@ impl U1024 {
         0
     }
 
+    /// Creates a U1024 value from a hexadecimal string.
+    ///
+    /// The function accepts an optional leading `"0x"` prefix, asserts the hex
+    /// length does not exceed 256 characters (1024 bits), and parses the string in
+    /// 16-hex-digit chunks from the least-significant end. Each parsed chunk is
+    /// placed into successive limbs starting at the least-significant limb. Parsing
+    /// fails with a panic on invalid hex characters.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let v = U1024::from_hex("0x01ff");
+    /// assert_eq!(v.0[0], 0x01ff);
+    ///
+    /// let v2 = U1024::from_hex("ff0000000000000001");
+    /// // low limb holds the least-significant 16 hex digits
+    /// assert_eq!(v2.0[0], 0xff0000000000000001u64);
+    /// ```
     pub fn from_hex(hex: &str) -> Self {
         let hex = hex.trim_start_matches("0x");
         assert!(hex.len() <= 256, "Hex string too long for U1024");
