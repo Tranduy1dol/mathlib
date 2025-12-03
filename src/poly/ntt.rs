@@ -1,6 +1,12 @@
 use crate::field::constants::get_params;
 use crate::field::element::FieldElement;
+use crate::{BigInt, U1024};
 
+/// Reorders coefficients in bit-reversal permutation order.
+///
+/// This function permutes the input slice such that the element at index `i` is swapped
+/// with the element at index `rev(i)`, where `rev(i)` is the bit-reversal of `i`
+/// with respect to the slice length `n`. The length `n` must be a power of two.
 pub fn bit_reverse(coeffs: &mut [FieldElement]) {
     let n = coeffs.len();
     let leading_zeros = n.leading_zeros() + 1;
@@ -13,6 +19,11 @@ pub fn bit_reverse(coeffs: &mut [FieldElement]) {
     }
 }
 
+/// Performs the Number Theoretic Transform (NTT) on the input coefficients.
+///
+/// This function computes the NTT (which is a Discrete Fourier Transform over a finite field)
+/// in-place using the Cooley-Tukey algorithm. The input length must be a power of two.
+/// The transform maps the polynomial representation from coefficient form to evaluation form.
 pub fn ntt(coeffs: &mut [FieldElement]) {
     let n = coeffs.len();
     assert!(n.is_power_of_two(), "NTT size must be power of two");
@@ -47,5 +58,28 @@ pub fn ntt(coeffs: &mut [FieldElement]) {
             }
         }
         len <<= 1;
+    }
+}
+
+/// Performs the Inverse Number Theoretic Transform (INTT) on the input coefficients.
+///
+/// This function computes the inverse NTT in-place. It first applies the forward NTT,
+/// then reverses the order of the coefficients (skipping the first one), and finally
+/// scales all coefficients by the modular inverse of the length `n`.
+/// The transform maps the polynomial representation from evaluation form back to coefficient form.
+pub fn intt(coeffs: &mut [FieldElement]) {
+    let n = coeffs.len();
+
+    ntt(coeffs);
+
+    coeffs[1..].reverse();
+
+    let params = coeffs[0].params;
+    let n_val = U1024::from_u64(n as u64);
+    let n_elem = FieldElement::new(n_val, params);
+    let n_inv = n_elem.inv();
+
+    for c in coeffs.iter_mut() {
+        *c = *c * n_inv;
     }
 }

@@ -132,6 +132,71 @@ impl<'a> FieldElement<'a> {
     pub fn to_u1024(&self) -> U1024 {
         self.params.reduce(&self.value, &U1024::zero())
     }
+
+    /// Computes `self` raised to the power of `exp` using square-and-multiply.
+    ///
+    /// The exponent `exp` is a `U1024` integer. The result is returned in Montgomery form.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
+    /// let base = FieldElement::new(U1024::from_u64(3), &params);
+    /// let exp = U1024::from_u64(3);
+    /// let res = base.pow(exp);
+    /// // 3^3 = 27 = 10 mod 17
+    /// assert_eq!(res.to_u1024(), U1024::from_u64(10));
+    /// ```
+    pub fn pow(&self, exp: U1024) -> Self {
+        let mut res = Self::one(self.params);
+        let mut base = *self;
+
+        for i in 0..16 {
+            let mut limb = exp.0[i];
+            for _ in 0..64 {
+                if (limb & 1) == 1 {
+                    res = res * base;
+                }
+                base = base * base;
+                limb >>= 1;
+            }
+        }
+        res
+    }
+
+    /// Computes the modular multiplicative inverse of `self`.
+    ///
+    /// This method uses Fermat's Little Theorem, computing `self^(modulus - 2)`.
+    /// It assumes the modulus is prime. If `self` is zero, the result is effectively
+    /// division by zero (undefined behavior in pure math), but here it will return
+    /// `0^(p-2) = 0`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::U1024;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// let modulus = U1024::from_u64(17);
+    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
+    /// let a = FieldElement::new(U1024::from_u64(3), &params);
+    /// let inv = a.inv();
+    /// // 3 * 6 = 18 = 1 mod 17
+    /// assert_eq!((a * inv).to_u1024(), U1024::one());
+    /// ```
+    pub fn inv(&self) -> Self {
+        let two = U1024::from_u64(2);
+        let (p_minus_2, _) = self.params.modulus.borrowing_sub(&two);
+        self.pow(p_minus_2)
+    }
 }
 
 impl<'a> Add for FieldElement<'a> {

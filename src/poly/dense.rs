@@ -2,6 +2,7 @@ use std::fmt;
 use std::ops::{Add, Mul};
 
 use crate::FieldElement;
+use crate::poly::ntt::{intt, ntt};
 
 #[derive(Clone)]
 pub struct DensePolynomial<'a> {
@@ -120,6 +121,68 @@ impl<'a> DensePolynomial<'a> {
         for i in (0..self.coeffs.len() - 1).rev() {
             res = (res * *x) + self.coeffs[i];
         }
+        res
+    }
+
+    /// Multiplies two polynomials using the Number Theoretic Transform (NTT).
+    ///
+    /// This method performs multiplication in O(n log n) time complexity, which is significantly
+    /// faster than the naive O(n^2) approach for large polynomials. It pads the coefficients
+    /// to a power of two, transforms them to evaluation form using NTT, performs pointwise
+    /// multiplication, and transforms back using Inverse NTT.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::field::element::FieldElement;
+    /// use mathlib::field::constants::get_params;
+    /// use mathlib::U1024;
+    /// use mathlib::traits::BigInt;
+    ///
+    /// // (1 + 2x) * (3 + 4x) = 3 + 10x + 8x^2
+    /// let params = get_params();
+    /// let one = FieldElement::new(U1024::from_u64(1), params);
+    /// let two = FieldElement::new(U1024::from_u64(2), params);
+    /// let three = FieldElement::new(U1024::from_u64(3), params);
+    /// let four = FieldElement::new(U1024::from_u64(4), params);
+    ///
+    /// let a = DensePolynomial::new(vec![one, two]);
+    /// let b = DensePolynomial::new(vec![three, four]);
+    /// let c = a.mul_fast(&b);
+    /// assert_eq!(c.coeffs.len(), 3);
+    /// ```
+    pub fn mul_fast(&self, rhs: &Self) -> Self {
+        if self.coeffs.is_empty() || rhs.coeffs.is_empty() {
+            return Self::zero();
+        }
+
+        let output_len = self.coeffs.len() + rhs.coeffs.len() - 1;
+
+        let size = output_len.next_power_of_two();
+
+        let params = self.coeffs[0].params;
+        let zero = FieldElement::zero(params);
+
+        let mut a_coeffs = self.coeffs.clone();
+        a_coeffs.resize(size, zero);
+
+        let mut b_coeffs = rhs.coeffs.clone();
+        b_coeffs.resize(size, zero);
+
+        ntt(&mut a_coeffs);
+        ntt(&mut b_coeffs);
+
+        for i in 0..size {
+            a_coeffs[i] = a_coeffs[i] * b_coeffs[i];
+        }
+
+        intt(&mut a_coeffs);
+
+        a_coeffs.truncate(output_len);
+
+        let mut res = Self::new(a_coeffs);
+        res.trim();
         res
     }
 }

@@ -27,3 +27,7 @@ avx2 = []
 [[bench]]
 name = "math_bench"
 harness = false
+
+[[bench]]
+name = "poly_bench"
+harness = false
