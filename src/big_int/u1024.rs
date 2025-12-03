@@ -38,6 +38,8 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
+    /// use mathlib::{U1024, BigInt};
+    ///
     /// let v = U1024::from_u64(0b10);
     /// assert!(!v.bit(0));
     /// assert!(v.bit(1));
@@ -62,6 +64,8 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
+    /// use mathlib::{U1024, BigInt};
+    ///
     /// let v = U1024::from_u64(0);
     /// assert_eq!(v.bits(), 0);
     ///
@@ -91,12 +95,17 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
+    /// use mathlib::{U1024, BigInt};
+    ///
     /// let v = U1024::from_hex("0x01ff");
     /// assert_eq!(v.0[0], 0x01ff);
     ///
     /// let v2 = U1024::from_hex("ff0000000000000001");
-    /// // low limb holds the least-significant 16 hex digits
-    /// assert_eq!(v2.0[0], 0xff0000000000000001u64);
+    /// // The string has 18 hex digits, so it spans 2 limbs
+    /// // Low limb (v2.0[0]) holds the least-significant 16 hex digits
+    /// assert_eq!(v2.0[0], 0x0000000000000001);
+    /// // Next limb (v2.0[1]) holds the remaining 2 hex digits
+    /// assert_eq!(v2.0[1], 0xff);
     /// ```
     pub fn from_hex(hex: &str) -> Self {
         let hex = hex.trim_start_matches("0x");
