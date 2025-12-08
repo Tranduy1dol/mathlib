@@ -197,3 +197,75 @@ fn test_from_hex_leading_zeros() {
     assert_eq!(v.0[0], 1);
     assert_eq!(v.0[1], 0);
 }
+
+#[test]
+fn test_comparison_basic() {
+    // Basic comparisons
+    let a = U1024::from_u64(100);
+    let b = U1024::from_u64(200);
+
+    assert!(a < b);
+    assert!(a <= b);
+    assert!(b > a);
+    assert!(b >= a);
+    assert!(a <= a);
+    assert!(a >= a);
+}
+
+#[test]
+fn test_comparison_equal() {
+    let a = U1024::from_u64(12345);
+    let b = U1024::from_u64(12345);
+
+    assert!(a <= b);
+    assert!(a >= b);
+    assert!(!(a < b));
+    assert!(!(a > b));
+}
+
+#[test]
+fn test_comparison_multi_limb() {
+    // Test where difference is in higher limb
+    let mut a = U1024::zero();
+    a.0[1] = 1; // a = 2^64
+
+    let mut b = U1024::zero();
+    b.0[1] = 2; // b = 2 * 2^64
+
+    assert!(a < b);
+    assert!(b > a);
+
+    // a has larger low limb but smaller high limb
+    let mut c = U1024::zero();
+    c.0[0] = u64::MAX;
+    c.0[1] = 0;
+
+    let mut d = U1024::zero();
+    d.0[0] = 0;
+    d.0[1] = 1;
+
+    assert!(c < d, "c should be less than d even though c.0[0] > d.0[0]");
+    assert!(d > c);
+}
+
+#[test]
+fn test_comparison_max_values() {
+    // Test with maximum values
+    let mut max = U1024::zero();
+    for i in 0..16 {
+        max.0[i] = u64::MAX;
+    }
+
+    let mut almost_max = U1024::zero();
+    for i in 0..16 {
+        almost_max.0[i] = u64::MAX;
+    }
+    almost_max.0[15] = u64::MAX - 1;
+
+    assert!(almost_max < max);
+    assert!(max > almost_max);
+
+    let zero = U1024::zero();
+    assert!(zero < max);
+    assert!(max > zero);
+}

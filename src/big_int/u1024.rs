@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt;
 use std::ops::{Add, BitXor, Mul, Sub};
 
@@ -338,6 +339,7 @@ impl Default for U1024 {
         Self::zero()
     }
 }
+
 impl fmt::Debug for U1024 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "0x")?;
@@ -347,8 +349,63 @@ impl fmt::Debug for U1024 {
         Ok(())
     }
 }
+
 impl fmt::Display for U1024 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(self, f)
+    }
+}
+
+impl PartialOrd for U1024 {
+    /// Compares two U1024 values.
+    ///
+    /// Comparison is performed from the most-significant limb to the least-significant
+    /// limb, returning as soon as a difference is found.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::{U1024, BigInt};
+    ///
+    /// let a = U1024::from_u64(100);
+    /// let b = U1024::from_u64(200);
+    /// assert!(a < b);
+    /// assert!(b > a);
+    /// assert!(a <= b);
+    /// assert!(b >= a);
+    /// ```
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for U1024 {
+    /// Compares two U1024 values for ordering.
+    ///
+    /// The comparison starts from the most-significant limb (index 15) and works
+    /// down to the least-significant limb (index 0). This ensures correct ordering
+    /// for the little-endian limb representation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::{U1024, BigInt};
+    /// use std::cmp::Ordering;
+    ///
+    /// let a = U1024::from_u64(100);
+    /// let b = U1024::from_u64(200);
+    /// assert_eq!(a.cmp(&b), Ordering::Less);
+    /// assert_eq!(b.cmp(&a), Ordering::Greater);
+    /// assert_eq!(a.cmp(&a), Ordering::Equal);
+    /// ```
+    fn cmp(&self, other: &Self) -> Ordering {
+        // Compare from most-significant limb to least-significant
+        for i in (0..LIMBS).rev() {
+            match self.0[i].cmp(&other.0[i]) {
+                Ordering::Equal => continue,
+                ord => return ord,
+            }
+        }
+        Ordering::Equal
     }
 }
