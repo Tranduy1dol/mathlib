@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      
 jobs:
   cargo-check:
     name: Cargo check
@@ -85,3 +86,43 @@ jobs:
           files: ./cobertura.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+
+  auto-tag:
+    name: Auto Tag Version
+    needs: [cargo-check, fmt-check, clippy, test-and-coverage]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history to check existing tags
+          
+      - name: Extract version from Cargo.toml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+          
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "ℹ️ Tag v${{ steps.get_version.outputs.VERSION }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "✅ Tag v${{ steps.get_version.outputs.VERSION }} does not exist"
+          fi
+          
+      - name: Create and push tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.get_version.outputs.VERSION }}" -m "Release v${{ steps.get_version.outputs.VERSION }}"
+          git push origin "v${{ steps.get_version.outputs.VERSION }}"
+          echo "🚀 Created and pushed tag v${{ steps.get_version.outputs.VERSION }}"

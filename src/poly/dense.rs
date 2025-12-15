@@ -17,15 +17,11 @@ impl<'a> DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
-    /// use mathlib::field::element::FieldElement;
-    /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::U1024;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{fp, mont};
+    /// use mathlib::{DensePolynomial, FieldElement};
     ///
     /// // Create a polynomial and have trailing zero coefficients trimmed
-    /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
+    /// let params = mont!(17u64, 2u64);
     /// let coeffs = vec![FieldElement::one(&params), FieldElement::zero(&params)];
     /// let poly = DensePolynomial::new(coeffs);
     /// assert_eq!(poly.coeffs.len(), 1);
@@ -45,17 +41,13 @@ impl<'a> DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
-    /// use mathlib::field::element::FieldElement;
-    /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::U1024;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{mont};
+    /// use mathlib::{DensePolynomial, FieldElement};
     ///
     /// // Given a polynomial constructed with trailing zero field elements,
     /// // constructing via `DensePolynomial::new` will result in those trailing
     /// // zeros being removed (internally by `trim`).
-    /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
+    /// let params = mont!(17u64, 2u64);
     /// let p = DensePolynomial::new(vec![FieldElement::one(&params), FieldElement::zero(&params)]);
     /// // trailing zero coefficients are removed so the length is shorter than input
     /// assert!(p.coeffs.len() < 2);
@@ -78,7 +70,7 @@ impl<'a> DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::DensePolynomial;
     ///
     /// let p = DensePolynomial::zero();
     /// assert!(p.coeffs.is_empty());
@@ -94,23 +86,19 @@ impl<'a> DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
-    /// use mathlib::field::element::FieldElement;
-    /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::U1024;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{fp, mont, u1024};
+    /// use mathlib::DensePolynomial;
     ///
     /// // Construct a polynomial p(x) = 3 + 2*x + 1*x^2 (coeffs are [3, 2, 1])
-    /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
-    /// let three = FieldElement::new(U1024::from_u64(3), &params);
-    /// let two = FieldElement::new(U1024::from_u64(2), &params);
-    /// let one = FieldElement::new(U1024::from_u64(1), &params);
-    /// let x = FieldElement::new(U1024::from_u64(5), &params);
+    /// let params = mont!(17u64, 2u64);
+    /// let three = fp!(3u64, &params);
+    /// let two = fp!(2u64, &params);
+    /// let one = fp!(1u64, &params);
+    /// let x = fp!(5u64, &params);
     /// let p = DensePolynomial::new(vec![three, two, one]);
     /// let y = p.evaluate(&x);
     /// // 3 + 2*5 + 1*5^2 = 3 + 10 + 25 = 38 = 4 mod 17
-    /// assert_eq!(y.to_u1024(), U1024::from_u64(4));
+    /// assert_eq!(y.to_u1024(), u1024!(4u64));
     /// ```
     pub fn evaluate(&self, x: &FieldElement<'a>) -> FieldElement<'a> {
         if self.coeffs.is_empty() {
@@ -128,24 +116,20 @@ impl<'a> DensePolynomial<'a> {
     ///
     /// This method performs multiplication in O(n log n) time complexity, which is significantly
     /// faster than the naive O(n^2) approach for large polynomials. It pads the coefficients
-    /// to a power of two, transforms them to evaluation form using NTT, performs pointwise
+    /// to a power of two, transforms them to an evaluation form using NTT, performs pointwise
     /// multiplication, and transforms back using Inverse NTT.
     ///
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
-    /// use mathlib::field::element::FieldElement;
-    /// use mathlib::field::constants::get_params;
-    /// use mathlib::U1024;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{fp, DensePolynomial, get_params};
     ///
     /// // (1 + 2x) * (3 + 4x) = 3 + 10x + 8x^2
     /// let params = get_params();
-    /// let one = FieldElement::new(U1024::from_u64(1), params);
-    /// let two = FieldElement::new(U1024::from_u64(2), params);
-    /// let three = FieldElement::new(U1024::from_u64(3), params);
-    /// let four = FieldElement::new(U1024::from_u64(4), params);
+    /// let one = fp!(1u64, params);
+    /// let two = fp!(2u64, params);
+    /// let three = fp!(3u64, params);
+    /// let four = fp!(4u64, params);
     ///
     /// let a = DensePolynomial::new(vec![one, two]);
     /// let b = DensePolynomial::new(vec![three, four]);
@@ -201,7 +185,7 @@ impl<'a> Add for DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::DensePolynomial;
     ///
     /// let a = DensePolynomial::zero();
     /// let b = DensePolynomial::zero();
@@ -235,26 +219,21 @@ impl<'a> Mul for DensePolynomial<'a> {
     type Output = Self;
     /// Computes the product of two polynomials and returns the resulting polynomial.
     ///
-    /// The resulting polynomial's coefficients are the discrete convolution of the input
+    /// The resulting polynomial coefficients are the discrete convolution of the input
     /// coefficient vectors (formal polynomial multiplication). If either operand is the
     /// zero polynomial (empty coefficients), the result is the zero polynomial.
     ///
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
-    /// use mathlib::field::element::FieldElement;
-    /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::U1024;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{fp, mont, DensePolynomial};
     ///
     /// // (1 + 2x) * (3 + 4x) = 3 + 10x + 8x^2
-    /// let modulus = U1024::from_u64(17);
-    /// let params = MontgomeryParams::new(modulus, U1024::from_u64(2));
-    /// let one = FieldElement::new(U1024::from_u64(1), &params);
-    /// let two = FieldElement::new(U1024::from_u64(2), &params);
-    /// let three = FieldElement::new(U1024::from_u64(3), &params);
-    /// let four = FieldElement::new(U1024::from_u64(4), &params);
+    /// let params = mont!(17u64, 2u64);
+    /// let one = fp!(1u64, &params);
+    /// let two = fp!(2u64, &params);
+    /// let three = fp!(3u64, &params);
+    /// let four = fp!(4u64, &params);
     ///
     /// let a = DensePolynomial::new(vec![one, two]);
     /// let b = DensePolynomial::new(vec![three, four]);
@@ -289,7 +268,7 @@ impl<'a> fmt::Debug for DensePolynomial<'a> {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::poly::dense::DensePolynomial;
+    /// use mathlib::DensePolynomial;
     ///
     /// let p = DensePolynomial::zero();
     /// let s = format!("{:?}", p);

@@ -1,13 +1,10 @@
-use mathlib::field::montgomery::MontgomeryParams;
 use mathlib::traits::BigInt;
-use mathlib::{DensePolynomial, FieldElement, U1024};
+use mathlib::{DensePolynomial, U1024, fp, mont, u1024};
 
 #[test]
 fn test_gmp_add() {
-    let a = U1024::from_u64(100);
-    let b = U1024::from_u64(50);
-    let c = a + b;
-    assert_eq!(c, U1024::from_u64(150));
+    let a = u1024!(100) + u1024!(50);
+    assert_eq!(a, u1024!(150));
 }
 
 #[test]
@@ -15,7 +12,7 @@ fn test_gmp_overflow() {
     let mut a = U1024::zero();
     a.0[0] = u64::MAX;
 
-    let b = U1024::from_u64(1);
+    let b = u1024!(1);
     let (c, carry) = a.carrying_add(&b);
 
     assert_eq!(c.0[0], 0);
@@ -45,21 +42,21 @@ fn test_full_flow() {
     let mut p = U1024::zero();
     p.0[0] = 17;
 
-    let params = MontgomeryParams::new(p, U1024::zero());
+    let params = mont!(p, U1024::zero());
 
-    let a = FieldElement::new(U1024::from_u64(5), &params);
-    let b = FieldElement::new(U1024::from_u64(7), &params);
+    let a = fp!(u1024!(5), &params);
+    let b = fp!(u1024!(7), &params);
     let prod = a * b;
 
     assert_eq!(prod.to_u1024().0[0], 1, "Multiplication failed");
     println!("5 * 7 mod 17 = {:?}", prod);
 
-    let c3 = FieldElement::new(U1024::from_u64(3), &params);
-    let c2 = FieldElement::new(U1024::from_u64(2), &params);
+    let c3 = fp!(u1024!(3), &params);
+    let c2 = fp!(u1024!(2), &params);
 
     let poly = DensePolynomial::new(vec![c3, c2]);
 
-    let x = FieldElement::new(U1024::from_u64(4), &params);
+    let x = fp!(u1024!(4), &params);
     let eval = poly.evaluate(&x);
 
     assert_eq!(eval.to_u1024().0[0], 11, "Poly eval failed");
@@ -69,7 +66,7 @@ fn test_full_flow() {
 #[test]
 fn test_bit_boundaries() {
     // Test bit 0 (LSB)
-    let v = U1024::from_u64(1);
+    let v = u1024!(1);
     assert!(v.bit(0), "bit 0 should be set");
     assert!(!v.bit(1), "bit 1 should not be set");
 
@@ -118,39 +115,39 @@ fn test_bit_boundaries() {
 #[test]
 fn test_from_hex_basic() {
     // Test minimal input
-    let v = U1024::from_hex("0");
+    let v = u1024!("0");
     assert_eq!(v, U1024::zero());
 
-    let v = U1024::from_hex("1");
+    let v = u1024!("1");
     assert_eq!(v.0[0], 1);
 
     // Test with 0x prefix
-    let v = U1024::from_hex("0x1");
+    let v = u1024!("0x1");
     assert_eq!(v.0[0], 1);
 
-    let v = U1024::from_hex("0xff");
+    let v = u1024!("0xff");
     assert_eq!(v.0[0], 0xff);
 }
 
 #[test]
 fn test_from_hex_limb_boundaries() {
     // Test exactly 16 hex digits (one full limb)
-    let v = U1024::from_hex("0123456789abcdef");
+    let v = u1024!("0123456789abcdef");
     assert_eq!(v.0[0], 0x0123456789abcdef);
     assert_eq!(v.0[1], 0);
 
     // Test 17 hex digits (spans two limbs)
-    let v = U1024::from_hex("10123456789abcdef");
+    let v = u1024!("10123456789abcdef");
     assert_eq!(v.0[0], 0x0123456789abcdef);
     assert_eq!(v.0[1], 0x1);
 
     // Test 18 hex digits
-    let v = U1024::from_hex("ff0000000000000001");
+    let v = u1024!("ff0000000000000001");
     assert_eq!(v.0[0], 0x0000000000000001);
     assert_eq!(v.0[1], 0xff);
 
     // Test 32 hex digits (two full limbs)
-    let v = U1024::from_hex("fedcba9876543210fedcba9876543210");
+    let v = u1024!("fedcba9876543210fedcba9876543210");
     assert_eq!(v.0[0], 0xfedcba9876543210);
     assert_eq!(v.0[1], 0xfedcba9876543210);
     assert_eq!(v.0[2], 0);
@@ -160,7 +157,7 @@ fn test_from_hex_limb_boundaries() {
 fn test_from_hex_max_length() {
     // Test maximum length (256 hex digits = 1024 bits)
     let hex_str = "f".repeat(256);
-    let v = U1024::from_hex(&hex_str);
+    let v = u1024!(hex_str.as_str());
 
     // All limbs should be u64::MAX
     for i in 0..16 {
@@ -173,27 +170,27 @@ fn test_from_hex_max_length() {
 fn test_from_hex_too_long() {
     // Test string longer than 256 hex digits
     let hex_str = "f".repeat(257);
-    U1024::from_hex(&hex_str);
+    u1024!(hex_str.as_str());
 }
 
 #[test]
 #[should_panic]
 fn test_from_hex_invalid_char() {
     // Test invalid hex character
-    U1024::from_hex("12g4");
+    u1024!("12g4");
 }
 
 #[test]
 fn test_from_hex_empty() {
     // Empty string should be treated as zero
-    let v = U1024::from_hex("");
+    let v = u1024!("");
     assert_eq!(v, U1024::zero());
 }
 
 #[test]
 fn test_from_hex_leading_zeros() {
     // Leading zeros should be handled correctly
-    let v = U1024::from_hex("00000001");
+    let v = u1024!("00000001");
     assert_eq!(v.0[0], 1);
     assert_eq!(v.0[1], 0);
 }
@@ -201,8 +198,8 @@ fn test_from_hex_leading_zeros() {
 #[test]
 fn test_comparison_basic() {
     // Basic comparisons
-    let a = U1024::from_u64(100);
-    let b = U1024::from_u64(200);
+    let a = u1024!(100);
+    let b = u1024!(200);
 
     assert!(a < b);
     assert!(a <= b);
@@ -214,8 +211,8 @@ fn test_comparison_basic() {
 
 #[test]
 fn test_comparison_equal() {
-    let a = U1024::from_u64(12345);
-    let b = U1024::from_u64(12345);
+    let a = u1024!(12345);
+    let b = u1024!(12345);
 
     assert!(a <= b);
     assert!(a >= b);

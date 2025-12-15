@@ -1,5 +1,6 @@
 # mathlib
 
+[![CI](https://github.com/Tranduy1dol/mathlib/actions/workflows/ci.yml/badge.svg)](https://github.com/Tranduy1dol/mathlib/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Tranduy1dol/mathlib/graph/badge.svg?token=S88FB34UD6)](https://codecov.io/gh/Tranduy1dol/mathlib)
 
 A high-performance mathematical library for Rust, designed for cryptographic applications such as Zero-Knowledge Proofs (ZKPs) and Post-Quantum Cryptography (PQC).
@@ -27,42 +28,56 @@ mathlib = { path = "." } # Or git repository URL
 ### Big Integer Arithmetic
 
 ```rust
-use mathlib::U1024;
-use mathlib::traits::BigInt;
+use mathlib::{u1024, BigInt};
 
-let a = U1024::from_u64(100);
-let b = U1024::from_u64(200);
+// Create U1024 values using the u1024! macro
+let a = u1024!(100u64);
+let b = u1024!(200u64);
 let (sum, carry) = a.carrying_add(&b);
-assert_eq!(sum, U1024::from_u64(300));
+assert_eq!(sum, u1024!(300u64));
+
+// From hex strings
+let c = u1024!("0xDEADBEEF");
+
+// From arrays
+let d = u1024!([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 ```
 
 ### Field Arithmetic
 
 ```rust
-use mathlib::U1024;
-use mathlib::field::element::FieldElement;
-use mathlib::field::constants::get_params;
-use mathlib::traits::BigInt;
+use mathlib::{fp, mont, u1024, get_params};
 
-// Use pre-defined cryptographic parameters
-let params = get_params();
-let a = FieldElement::new(U1024::from_u64(5), params);
-let b = FieldElement::new(U1024::from_u64(3), params);
+// Create Montgomery parameters using the mont! macro
+let params = mont!(17u64, 2u64);
+
+// Create field elements using the fp! macro
+let a = fp!(5u64, &params);
+let b = fp!(3u64, &params);
 let prod = a * b;
+
+// Or use pre-defined cryptographic parameters
+let params = get_params();
+let c = fp!(42u64, params);
 ```
 
 ### Polynomial Operations
 
 ```rust
-use mathlib::poly::dense::DensePolynomial;
-use mathlib::field::element::FieldElement;
-use mathlib::field::constants::get_params;
-use mathlib::U1024;
+use mathlib::{fp, DensePolynomial, get_params};
 
 let params = get_params();
-let one = FieldElement::new(U1024::from_u64(1), params);
-// Create polynomial P(x) = 1 + x
-let poly = DensePolynomial::new(vec![one, one]);
+
+// Create field elements using the fp! macro
+let one = fp!(1u64, params);
+let two = fp!(2u64, params);
+
+// Create polynomial P(x) = 1 + 2x
+let poly = DensePolynomial::new(vec![one, two]);
+
+// Evaluate at a point
+let x = fp!(5u64, params);
+let y = poly.evaluate(&x);
 ```
 
 ## Architecture

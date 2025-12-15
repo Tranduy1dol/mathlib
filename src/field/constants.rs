@@ -6,8 +6,8 @@
 
 use std::sync::OnceLock;
 
-use crate::U1024;
 use crate::field::montgomery::MontgomeryParams;
+use crate::{mont, u1024};
 
 /// The prime field modulus P in hexadecimal representation.
 ///
@@ -46,16 +46,16 @@ static PARAMS: OnceLock<MontgomeryParams> = OnceLock::new();
 /// # Examples
 ///
 /// ```
-/// use mathlib::field::constants::get_params;
+/// use mathlib::get_params;
 ///
 /// let params = get_params();
 /// // Use params for field arithmetic operations
 /// ```
 pub fn get_params() -> &'static MontgomeryParams {
     PARAMS.get_or_init(|| {
-        let modulus = U1024::from_hex(P_HEX);
-        let root = U1024::from_hex(W_HEX);
+        let modulus = u1024!(P_HEX);
+        let root = u1024!(W_HEX);
 
-        MontgomeryParams::new(modulus, root)
+        mont!(modulus, root)
     })
 }

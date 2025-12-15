@@ -1,6 +1,84 @@
 use crate::U1024;
 use crate::traits::BigInt;
 
+/// Macro to create MontgomeryParams from different sources.
+///
+/// # Examples
+///
+/// ```
+/// use mathlib::{mont, u1024};
+///
+/// // From U1024 values
+/// let params = mont!(u1024!(17), u1024!(2));
+///
+/// // From primitive types
+/// let params2 = mont!(17u64, 2u64);
+/// let params3 = mont!(17u32, 2u32);
+///
+/// // From hex strings
+/// let params4 = mont!("0x11", "0x2");
+/// ```
+#[macro_export]
+macro_rules! mont {
+    // Two arguments: modulus and root_of_unity
+    ($modulus:expr, $root:expr) => {{
+        #[allow(unused_imports)]
+        {
+            // Helper trait to convert to U1024
+            trait ToU1024Param {
+                fn to_u1024_param(self) -> $crate::U1024;
+            }
+
+            impl ToU1024Param for &str {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_hex(self)
+                }
+            }
+
+            impl ToU1024Param for u8 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_u8(self)
+                }
+            }
+
+            impl ToU1024Param for u16 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_u16(self)
+                }
+            }
+
+            impl ToU1024Param for u32 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_u32(self)
+                }
+            }
+
+            impl ToU1024Param for u64 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_u64(self)
+                }
+            }
+
+            impl ToU1024Param for u128 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    $crate::U1024::from_u128(self)
+                }
+            }
+
+            impl ToU1024Param for $crate::U1024 {
+                fn to_u1024_param(self) -> $crate::U1024 {
+                    self
+                }
+            }
+
+            $crate::field::montgomery::MontgomeryParams::new(
+                ToU1024Param::to_u1024_param($modulus),
+                ToU1024Param::to_u1024_param($root),
+            )
+        }
+    }};
+}
+
 /// Montgomery parameters for efficient modular arithmetic in a prime field.
 ///
 /// This struct holds precomputed values needed for Montgomery reduction,
@@ -35,16 +113,14 @@ impl MontgomeryParams {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
-    /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::traits::BigInt;
+    /// use mathlib::{mont, u1024};
     ///
     /// // Construct parameters for modulus 17 with root of unity 3
-    /// let m = U1024::from_u64(17);
-    /// let w = U1024::from_u64(3);
-    /// let params = MontgomeryParams::new(m.clone(), w);
-    /// assert_eq!(params.modulus, m);
-    /// assert_eq!(params.root_of_unity, w);
+    /// let m = u1024!(17);
+    /// let w = u1024!(3);
+    /// let params = mont!(m, w);
+    /// assert_eq!(params.modulus, u1024!(17));
+    /// assert_eq!(params.root_of_unity, u1024!(3));
     /// ```
     pub fn new(modulus: U1024, root_of_unity: U1024) -> Self {
         let n_prime = Self::compute_n_prime(&modulus);
@@ -67,13 +143,12 @@ impl MontgomeryParams {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use mathlib::{u1024, U1024};
     /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::traits::BigInt;
     ///
-    /// let m = U1024::from_u64(3);
+    /// let m = u1024!(3u64);
     /// let n_prime = MontgomeryParams::compute_n_prime(&m);
-    /// let _ = n_prime; // n_prime can now be used in Montgomery reduction
+    /// let _: U1024 = n_prime; // n_prime can now be used in Montgomery reduction
     /// ```
     pub fn compute_n_prime(modulus: &U1024) -> U1024 {
         let mut inv = 1u64;
@@ -106,14 +181,13 @@ impl MontgomeryParams {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use mathlib::{u1024, BigInt};
     /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::traits::BigInt;
     ///
-    /// let m = U1024::from_u64(3);
+    /// let m = u1024!(3u64);
     /// let r2 = MontgomeryParams::compute_r2(&m);
     /// // 2^2048 mod 3 == 1
-    /// assert_eq!(r2, U1024::one());
+    /// assert_eq!(r2, u1024!(1u64));
     /// ```
     pub fn compute_r2(modulus: &U1024) -> U1024 {
         let mut acc = U1024::one();
@@ -139,19 +213,18 @@ impl MontgomeryParams {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use mathlib::u1024;
     /// use mathlib::field::montgomery::MontgomeryParams;
-    /// use mathlib::traits::BigInt;
     ///
     /// let params = MontgomeryParams {
-    ///     modulus: U1024::one(),
-    ///     r2: U1024::one(),
-    ///     n_prime: U1024::one(),
-    ///     root_of_unity: U1024::one(),
+    ///     modulus: u1024!(1u64),
+    ///     r2: u1024!(1u64),
+    ///     n_prime: u1024!(1u64),
+    ///     root_of_unity: u1024!(1u64),
     /// };
-    /// let lo = U1024::zero();
-    /// let hi = U1024::zero();
-    /// assert_eq!(params.reduce(&lo, &hi), U1024::zero());
+    /// let lo = u1024!(0u64);
+    /// let hi = u1024!(0u64);
+    /// assert_eq!(params.reduce(&lo, &hi), u1024!(0u64));
     /// ```
     #[inline]
     pub fn reduce(&self, lo: &U1024, hi: &U1024) -> U1024 {

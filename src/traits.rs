@@ -21,8 +21,6 @@ pub trait BigInt:
 
     fn one() -> Self;
 
-    fn from_u64(v: u64) -> Self;
-
     fn carrying_add(&self, rhs: &Self) -> (Self, bool);
 
     fn borrowing_sub(&self, rhs: &Self) -> (Self, bool);

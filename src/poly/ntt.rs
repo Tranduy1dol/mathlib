@@ -1,6 +1,4 @@
-use crate::field::constants::get_params;
-use crate::field::element::FieldElement;
-use crate::{BigInt, U1024};
+use crate::{FieldElement, get_params, u1024};
 
 /// Reorders coefficients in bit-reversal permutation order.
 ///
@@ -75,7 +73,7 @@ pub fn intt(coeffs: &mut [FieldElement]) {
     coeffs[1..].reverse();
 
     let params = coeffs[0].params;
-    let n_val = U1024::from_u64(n as u64);
+    let n_val = u1024!(n as u64);
     let n_elem = FieldElement::new(n_val, params);
     let n_inv = n_elem.inv();
 

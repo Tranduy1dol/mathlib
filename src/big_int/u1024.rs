@@ -18,6 +18,123 @@ use crate::traits::BigInt;
 
 pub(crate) const LIMBS: usize = 16;
 
+/// Macro to create a U1024 value from different sources.
+///
+/// # Examples
+///
+/// ```
+/// use mathlib::u1024;
+///
+/// // From a hex string
+/// let a = u1024!("0x1234");
+///
+/// // From an array of u64 limbs
+/// let b = u1024!([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+///
+/// // From primitive types (with type suffixes)
+/// let c = u1024!(42u8);
+/// let d = u1024!(1000u16);
+/// let e = u1024!(100000u32);
+/// let f = u1024!(123456789u64);
+/// let g = u1024!(0x123456789ABCDEFu128);
+/// ```
+#[macro_export]
+macro_rules! u1024 {
+    // From array of u64 - must come first to match array syntax
+    ([$($limb:expr),+ $(,)?]) => {{
+        $crate::U1024([$($limb),+])
+    }};
+    // From hex string - strings must come before general expressions
+    ($hex:expr) => {{
+        // Use a helper to dispatch based on type
+        #[allow(unused_imports)]
+        {
+            // Try to match a string type first
+            #[allow(dead_code)]
+            const fn is_str_type<T: ?Sized>(_: &T) -> bool {
+                false
+            }
+            #[allow(dead_code)]
+            const fn is_str_type_str(_: &&str) -> bool {
+                true
+            }
+
+            // Helper trait to convert to U1024
+            trait ToU1024 {
+                fn to_u1024(self) -> $crate::U1024;
+            }
+
+            impl ToU1024 for &str {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_hex(self)
+                }
+            }
+
+            impl ToU1024 for i8 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u8(self as u8)
+                }
+            }
+
+            impl ToU1024 for i16 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u16(self as u16)
+                }
+            }
+
+            impl ToU1024 for i32 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u32(self as u32)
+                }
+            }
+
+            impl ToU1024 for i64 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u64(self as u64)
+                }
+            }
+
+            impl ToU1024 for i128 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u128(self as u128)
+                }
+            }
+
+            impl ToU1024 for u8 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u8(self)
+                }
+            }
+
+            impl ToU1024 for u16 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u16(self)
+                }
+            }
+
+            impl ToU1024 for u32 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u32(self)
+                }
+            }
+
+            impl ToU1024 for u64 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u64(self)
+                }
+            }
+
+            impl ToU1024 for u128 {
+                fn to_u1024(self) -> $crate::U1024 {
+                    $crate::U1024::from_u128(self)
+                }
+            }
+
+            ToU1024::to_u1024($hex)
+        }
+    }};
+}
+
 #[repr(C)]
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct U1024(pub [u64; LIMBS]);
@@ -25,7 +142,7 @@ pub struct U1024(pub [u64; LIMBS]);
 impl U1024 {
     /// Report whether the bit at the given zero-based index is set.
     ///
-    /// The index 0 refers to the least-significant bit of the value; valid indexes are 0 through 1023.
+    /// Index 0 refers to the least-significant bit of the value; valid indexes are 0 through 1023.
     /// If `index >= 1024`, the function returns `false`.
     ///
     /// # Parameters
@@ -39,9 +156,9 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{U1024, BigInt};
+    /// use mathlib::u1024;
     ///
-    /// let v = U1024::from_u64(0b10);
+    /// let v = u1024!(0b10u64);
     /// assert!(!v.bit(0));
     /// assert!(v.bit(1));
     /// assert!(!v.bit(1024)); // out-of-range
@@ -65,15 +182,15 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{U1024, BigInt};
+    /// use mathlib::u1024;
     ///
-    /// let v = U1024::from_u64(0);
+    /// let v = u1024!(0u64);
     /// assert_eq!(v.bits(), 0);
     ///
-    /// let v = U1024::from_u64(1);
+    /// let v = u1024!(1u64);
     /// assert_eq!(v.bits(), 1);
     ///
-    /// let v = U1024::from_u64(0x10);
+    /// let v = u1024!(0x10u64);
     /// assert_eq!(v.bits(), 5);
     /// ```
     pub fn bits(&self) -> usize {
@@ -96,12 +213,12 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{U1024, BigInt};
+    /// use mathlib::u1024;
     ///
-    /// let v = U1024::from_hex("0x01ff");
+    /// let v = u1024!("0x01ff");
     /// assert_eq!(v.0[0], 0x01ff);
     ///
-    /// let v2 = U1024::from_hex("ff0000000000000001");
+    /// let v2 = u1024!("ff0000000000000001");
     /// // The string has 18 hex digits, so it spans 2 limbs
     /// // Low limb (v2.0[0]) holds the least-significant 16 hex digits
     /// assert_eq!(v2.0[0], 0x0000000000000001);
@@ -127,6 +244,166 @@ impl U1024 {
             }
             limb_idx += 1;
             char_idx = start;
+        }
+        res
+    }
+
+    /// Creates a U1024 value from a u8.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::u1024;
+    ///
+    /// let v = u1024!(42u8);
+    /// assert_eq!(v.0[0], 42);
+    /// ```
+    pub fn from_u8(v: u8) -> Self {
+        let mut arr = [0; LIMBS];
+        arr[0] = v as u64;
+        U1024(arr)
+    }
+
+    /// Creates a U1024 value from a u16.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::u1024;
+    ///
+    /// let v = u1024!(1000u16);
+    /// assert_eq!(v.0[0], 1000);
+    /// ```
+    pub fn from_u16(v: u16) -> Self {
+        let mut arr = [0; LIMBS];
+        arr[0] = v as u64;
+        U1024(arr)
+    }
+
+    /// Creates a U1024 value from a u32.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::u1024;
+    ///
+    /// let v = u1024!(100000u32);
+    /// assert_eq!(v.0[0], 100000);
+    /// ```
+    pub fn from_u32(v: u32) -> Self {
+        let mut arr = [0; LIMBS];
+        arr[0] = v as u64;
+        U1024(arr)
+    }
+
+    /// Creates a U1024 value from a u64.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::u1024;
+    ///
+    /// let v = u1024!(123456789u64);
+    /// assert_eq!(v.0[0], 123456789);
+    /// ```
+    pub fn from_u64(v: u64) -> Self {
+        let mut arr = [0; LIMBS];
+        arr[0] = v;
+        U1024(arr)
+    }
+
+    /// Creates a U1024 value from a u128.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::u1024;
+    ///
+    /// let v = u1024!(0x123456789ABCDEF0123456789ABCDEFu128);
+    /// assert_eq!(v.0[0], 0x0123456789ABCDEFu64);
+    /// assert_eq!(v.0[1], 0x123456789ABCDEFu64);
+    /// ```
+    pub fn from_u128(v: u128) -> Self {
+        let mut arr = [0; LIMBS];
+        arr[0] = v as u64;
+        arr[1] = (v >> 64) as u64;
+        U1024(arr)
+    }
+
+    /// Creates a U1024 value from a bit array (bool array).
+    ///
+    /// The array should have up to 1024 elements, where index 0 represents the
+    /// least-significant bit. Any elements beyond index 1023 are ignored.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::U1024;
+    ///
+    /// let bits = [true, false, true, true]; // Represents binary 0b1101 = 13
+    /// let v = U1024::from_bits(&bits);
+    /// assert_eq!(v.0[0], 0b1101);
+    /// ```
+    pub fn from_bits(bits: &[bool]) -> Self {
+        let mut res = U1024::zero();
+        for (i, &bit) in bits.iter().enumerate().take(1024) {
+            if bit {
+                let limb_idx = i / 64;
+                let bit_idx = i % 64;
+                res.0[limb_idx] |= 1u64 << bit_idx;
+            }
+        }
+        res
+    }
+
+    /// Creates a U1024 value from a slice of bytes in little-endian order.
+    ///
+    /// The slice should have up to 128 bytes (1024 bits). Any additional bytes
+    /// are ignored. Bytes are interpreted in little-endian order where the first
+    /// byte represents the least-significant byte.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::U1024;
+    ///
+    /// let bytes = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+    /// let v = U1024::from_le_bytes(&bytes);
+    /// assert_eq!(v.0[0], 0x0807060504030201u64);
+    /// ```
+    pub fn from_le_bytes(bytes: &[u8]) -> Self {
+        let mut res = U1024::zero();
+        for (i, &byte) in bytes.iter().enumerate().take(128) {
+            let limb_idx = i / 8;
+            let byte_idx = i % 8;
+            res.0[limb_idx] |= (byte as u64) << (byte_idx * 8);
+        }
+        res
+    }
+
+    /// Creates a U1024 value from a slice of bytes in big-endian order.
+    ///
+    /// The slice should have up to 128 bytes (1024 bits). Any additional bytes
+    /// are ignored. Bytes are interpreted in big-endian order where the first
+    /// byte represents the most-significant byte.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mathlib::U1024;
+    ///
+    /// let bytes = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
+    /// let v = U1024::from_be_bytes(&bytes);
+    /// assert_eq!(v.0[0], 0x0102030405060708u64);
+    /// ```
+    pub fn from_be_bytes(bytes: &[u8]) -> Self {
+        let mut res = U1024::zero();
+        let n = bytes.len().min(128);
+        for (i, &byte) in bytes.iter().take(n).enumerate() {
+            let bit_pos = (n - 1 - i) * 8;
+            let limb_idx = bit_pos / 64;
+            let byte_idx = (bit_pos % 64) / 8;
+            res.0[limb_idx] |= (byte as u64) << (byte_idx * 8);
         }
         res
     }
@@ -248,12 +525,6 @@ impl BigInt for U1024 {
         U1024(v)
     }
 
-    fn from_u64(v: u64) -> Self {
-        let mut arr = [0; LIMBS];
-        arr[0] = v;
-        U1024(arr)
-    }
-
     fn carrying_add(&self, rhs: &Self) -> (Self, bool) {
         #[cfg(feature = "gmp")]
         return self.gmp_add(rhs);
@@ -365,10 +636,10 @@ impl PartialOrd for U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{U1024, BigInt};
+    /// use mathlib::u1024;
     ///
-    /// let a = U1024::from_u64(100);
-    /// let b = U1024::from_u64(200);
+    /// let a = u1024!(100u64);
+    /// let b = u1024!(200u64);
     /// assert!(a < b);
     /// assert!(b > a);
     /// assert!(a <= b);
@@ -389,11 +660,11 @@ impl Ord for U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{U1024, BigInt};
+    /// use mathlib::u1024;
     /// use std::cmp::Ordering;
     ///
-    /// let a = U1024::from_u64(100);
-    /// let b = U1024::from_u64(200);
+    /// let a = u1024!(100u64);
+    /// let b = u1024!(200u64);
     /// assert_eq!(a.cmp(&b), Ordering::Less);
     /// assert_eq!(b.cmp(&a), Ordering::Greater);
     /// assert_eq!(a.cmp(&a), Ordering::Equal);
