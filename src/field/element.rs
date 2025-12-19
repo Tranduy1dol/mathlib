@@ -224,7 +224,6 @@ impl<C: FieldConfig> FieldElement<C> {
     }
 }
 
-
 // Trait Implementations
 
 impl<C: FieldConfig> Add for FieldElement<C> {

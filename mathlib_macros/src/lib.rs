@@ -139,7 +139,7 @@ mod tests {
     fn test_biguint_to_u64_array_small() {
         let value = BigUint::from(42u64);
         let arr = biguint_to_u64_array(&value);
-        
+
         assert_eq!(arr[0], 42);
         for i in 1..16 {
             assert_eq!(arr[i], 0, "Limb {} should be zero", i);
@@ -150,7 +150,7 @@ mod tests {
     fn test_biguint_to_u64_array_large() {
         let value = BigUint::from_str_radix("FFFFFFFFFFFFFFFF", 16).unwrap();
         let arr = biguint_to_u64_array(&value);
-        
+
         assert_eq!(arr[0], u64::MAX);
         for i in 1..16 {
             assert_eq!(arr[i], 0, "Limb {} should be zero", i);
@@ -162,9 +162,9 @@ mod tests {
         // Create a value that spans multiple limbs
         let mut value = BigUint::from(u64::MAX);
         value = (value << 64) + BigUint::from(12345u64);
-        
+
         let arr = biguint_to_u64_array(&value);
-        
+
         assert_eq!(arr[0], 12345);
         assert_eq!(arr[1], u64::MAX);
         for i in 2..16 {
@@ -176,7 +176,7 @@ mod tests {
     fn test_biguint_to_u64_array_zero() {
         let value = BigUint::from(0u64);
         let arr = biguint_to_u64_array(&value);
-        
+
         for i in 0..16 {
             assert_eq!(arr[i], 0, "All limbs should be zero");
         }
@@ -187,15 +187,19 @@ mod tests {
         // Test with modulus = 17
         let modulus = BigUint::from(17u64);
         let n_prime = compute_n_prime_bigint(&modulus);
-        
+
         // N' should satisfy: P * N' ≡ -1 (mod 2^1024)
         // Which means: P * N' + 1 ≡ 0 (mod 2^1024)
         let product = &modulus * &n_prime;
         let plus_one = product + BigUint::one();
         let r = BigUint::one() << 1024;
         let remainder = plus_one % r;
-        
-        assert_eq!(remainder, BigUint::from(0u64), "P * N' + 1 should be divisible by R");
+
+        assert_eq!(
+            remainder,
+            BigUint::from(0u64),
+            "P * N' + 1 should be divisible by R"
+        );
     }
 
     #[test]
@@ -203,11 +207,11 @@ mod tests {
         // Test with modulus = 17
         let modulus = BigUint::from(17u64);
         let r2 = compute_r2_bigint(&modulus);
-        
+
         // R^2 mod 17 should equal ((2^1024)^2) mod 17
         // For small modulus like 17, we can verify: 2^2048 mod 17
         let expected = BigUint::from(2u32).modpow(&BigUint::from(2048u32), &modulus);
-        
+
         assert_eq!(r2, expected);
     }
 
@@ -219,7 +223,7 @@ mod tests {
             BigUint::from(97u64),
             BigUint::from(65521u64), // Large prime
         ];
-        
+
         for modulus in test_moduli {
             let r2 = compute_r2_bigint(&modulus);
             assert!(r2 < modulus, "R^2 mod P should be less than P");
@@ -234,20 +238,20 @@ mod tests {
             BigUint::from(97u64),
             BigUint::from(257u64),
         ];
-        
+
         for modulus in test_moduli {
             let n_prime = compute_n_prime_bigint(&modulus);
-            
+
             // Verify the property: P * N' + 1 ≡ 0 (mod R)
             let product = &modulus * &n_prime;
             let plus_one = product + BigUint::one();
             let r = BigUint::one() << 1024;
             let remainder = plus_one % r;
-            
+
             assert_eq!(
-                remainder, 
+                remainder,
                 BigUint::from(0u64),
-                "N' property failed for modulus {}", 
+                "N' property failed for modulus {}",
                 modulus
             );
         }
@@ -258,13 +262,13 @@ mod tests {
         // Test that both "0x11" and "11" parse correctly
         let with_prefix = "0x11";
         let without_prefix = "11";
-        
+
         let clean_with = with_prefix.strip_prefix("0x").unwrap_or(with_prefix);
         let clean_without = without_prefix.strip_prefix("0x").unwrap_or(without_prefix);
-        
+
         let val1 = BigUint::from_str_radix(clean_with, 16).unwrap();
         let val2 = BigUint::from_str_radix(clean_without, 16).unwrap();
-        
+
         assert_eq!(val1, val2);
         assert_eq!(val1, BigUint::from(17u64));
     }
@@ -274,13 +278,13 @@ mod tests {
         // Test that converting BigUint -> array -> BigUint preserves value
         let original = BigUint::from_str_radix("123456789ABCDEF", 16).unwrap();
         let arr = biguint_to_u64_array(&original);
-        
+
         // Convert back
         let mut reconstructed = BigUint::from(0u64);
         for (i, &limb) in arr.iter().enumerate() {
             reconstructed += BigUint::from(limb) << (64 * i);
         }
-        
+
         assert_eq!(original, reconstructed);
     }
 
@@ -289,7 +293,7 @@ mod tests {
         let modulus = BigUint::from(17u64);
         let r2_1 = compute_r2_bigint(&modulus);
         let r2_2 = compute_r2_bigint(&modulus);
-        
+
         assert_eq!(r2_1, r2_2, "R2 computation should be deterministic");
     }
 
@@ -298,7 +302,10 @@ mod tests {
         let modulus = BigUint::from(17u64);
         let n_prime_1 = compute_n_prime_bigint(&modulus);
         let n_prime_2 = compute_n_prime_bigint(&modulus);
-        
-        assert_eq!(n_prime_1, n_prime_2, "N' computation should be deterministic");
+
+        assert_eq!(
+            n_prime_1, n_prime_2,
+            "N' computation should be deterministic"
+        );
     }
 }
