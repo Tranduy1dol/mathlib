@@ -139,15 +139,44 @@ impl<C: FieldConfig> fmt::Display for DensePolynomial<C> {
         }
 
         let mut first = true;
+        let one = crate::U1024([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
         for (i, coeff) in self.coeffs.iter().enumerate().rev() {
             // Skip zero coefficients
             if coeff.is_zero() {
                 continue;
             }
 
-            // Get coefficient value as u64 (for display purposes)
-            // This is a simplified version - in production you'd want better formatting
-            let coeff_u64 = coeff.to_u1024().0[0];
+            // Get the full 1024-bit coefficient value
+            let coeff_u1024 = coeff.to_u1024();
+
+            // Check if coefficient is exactly 1 (compare full 1024-bit representation)
+            let is_one = coeff_u1024.0 == one.0;
+
+            // Format coefficient: use compact decimal if small (fits in u64), otherwise hex
+            let coeff_str = if coeff_u1024.0[1..].iter().all(|&x| x == 0) {
+                // Fits in the first limb (≤64 bits), use decimal
+                format!("{}", coeff_u1024.0[0])
+            } else {
+                // Large value, use hex with 0x prefix
+                // Build hex string from limbs (big-endian order for display)
+                let mut hex_str = String::from("0x");
+                let mut started = false;
+                for &limb in coeff_u1024.0.iter().rev() {
+                    if !started && limb == 0 {
+                        continue; // Skip leading zero limbs
+                    }
+                    if started {
+                        // After first non-zero limb, pad to 16 hex digits
+                        hex_str.push_str(&format!("{:016x}", limb));
+                    } else {
+                        // First non-zero limb, no padding
+                        hex_str.push_str(&format!("{:x}", limb));
+                        started = true;
+                    }
+                }
+                hex_str
+            };
 
             // Add + sign for non-first terms
             if !first {
@@ -158,22 +187,22 @@ impl<C: FieldConfig> fmt::Display for DensePolynomial<C> {
             match i {
                 0 => {
                     // Constant term
-                    write!(f, "{}", coeff_u64)?;
+                    write!(f, "{}", coeff_str)?;
                 }
                 1 => {
                     // Linear term
-                    if coeff_u64 == 1 {
+                    if is_one {
                         write!(f, "x")?;
                     } else {
-                        write!(f, "{}x", coeff_u64)?;
+                        write!(f, "{}x", coeff_str)?;
                     }
                 }
                 _ => {
                     // Higher degree terms
-                    if coeff_u64 == 1 {
+                    if is_one {
                         write!(f, "x^{}", i)?;
                     } else {
-                        write!(f, "{}x^{}", coeff_u64, i)?;
+                        write!(f, "{}x^{}", coeff_str, i)?;
                     }
                 }
             }

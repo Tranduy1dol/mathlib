@@ -224,10 +224,6 @@ impl<C: FieldConfig> FieldElement<C> {
     }
 }
 
-// Implement one() properly outside impl block to use const helper
-impl<C: FieldConfig> FieldElement<C> {
-    // Re-declaring one() here just overrides? No, rust allows multiple impl blocks.
-}
 
 // Trait Implementations
 
