@@ -140,6 +140,92 @@ macro_rules! u1024 {
 pub struct U1024(pub [u64; LIMBS]);
 
 impl U1024 {
+    pub const ZERO: Self = Self([0; LIMBS]);
+
+    /// Const-compatible equality check
+    pub const fn const_eq(&self, other: &Self) -> bool {
+        let mut i = 0;
+        while i < LIMBS {
+            if self.0[i] != other.0[i] {
+                return false;
+            }
+            i += 1;
+        }
+        true
+    }
+
+    /// Const-compatible addition. Returns (result, carry).
+    pub const fn const_add(&self, rhs: &Self) -> (Self, bool) {
+        let mut ret = [0u64; LIMBS];
+        let mut carry = 0u64;
+        let mut i = 0;
+
+        while i < LIMBS {
+            let (sum1, c1) = self.0[i].overflowing_add(rhs.0[i]);
+            let (sum2, c2) = sum1.overflowing_add(carry);
+
+            ret[i] = sum2;
+            carry = (c1 as u64) + (c2 as u64);
+            i += 1;
+        }
+        (U1024(ret), carry != 0)
+    }
+
+    /// Const-compatible subtraction. Returns (result, borrow).
+    pub const fn const_sub(&self, rhs: &Self) -> (Self, bool) {
+        let mut ret = [0u64; LIMBS];
+        let mut borrow = 0u64;
+        let mut i = 0;
+
+        while i < LIMBS {
+            let (diff1, b1) = self.0[i].overflowing_sub(rhs.0[i]);
+            let (diff2, b2) = diff1.overflowing_sub(borrow);
+
+            ret[i] = diff2;
+            borrow = (b1 as u64) + (b2 as u64);
+            i += 1;
+        }
+        (U1024(ret), borrow != 0)
+    }
+
+    /// Const-compatible multiplication. Returns (low, high).
+    pub const fn const_mul(&self, rhs: &Self) -> (Self, Self) {
+        let mut res = [0u64; LIMBS * 2];
+        let mut i = 0;
+
+        while i < LIMBS {
+            let mut carry = 0u64;
+            let mut j = 0;
+            while j < LIMBS {
+                let k = i + j;
+                let val = res[k] as u128 + (self.0[i] as u128 * rhs.0[j] as u128) + carry as u128;
+                res[k] = val as u64;
+                carry = (val >> 64) as u64;
+                j += 1;
+            }
+            let mut k = i + LIMBS;
+            while carry > 0 && k < LIMBS * 2 {
+                let val = res[k] as u128 + carry as u128;
+                res[k] = val as u64;
+                carry = (val >> 64) as u64;
+                k += 1;
+            }
+            i += 1;
+        }
+
+        let mut low = [0u64; LIMBS];
+        let mut high = [0u64; LIMBS];
+
+        let mut k = 0;
+        while k < LIMBS {
+            low[k] = res[k];
+            high[k] = res[k + LIMBS];
+            k += 1;
+        }
+
+        (U1024(low), U1024(high))
+    }
+
     /// Report whether the bit at the given zero-based index is set.
     ///
     /// Index 0 refers to the least-significant bit of the value; valid indexes are 0 through 1023.

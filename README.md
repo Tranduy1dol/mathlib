@@ -46,37 +46,35 @@ let d = u1024!([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
 ### Field Arithmetic
 
 ```rust
-use mathlib::{fp, mont, u1024, get_params};
+use mathlib::fp;
 
-// Create Montgomery parameters using the mont! macro
-let params = mont!(17u64, 2u64);
-
-// Create field elements using the fp! macro
-let a = fp!(5u64, &params);
-let b = fp!(3u64, &params);
+// Use the default field configuration
+let a = fp!(5u64);
+let b = fp!(3u64);
 let prod = a * b;
 
-// Or use pre-defined cryptographic parameters
-let params = get_params();
-let c = fp!(42u64, params);
+// Or define a custom field
+#[derive(mathlib::FieldConfig, Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[modulus = "0x11"] // modulus = 17
+struct MyField;
+
+let c = fp!(42u64, MyField);
 ```
 
 ### Polynomial Operations
 
 ```rust
-use mathlib::{fp, DensePolynomial, get_params};
+use mathlib::{fp, DensePolynomial};
 
-let params = get_params();
-
-// Create field elements using the fp! macro
-let one = fp!(1u64, params);
-let two = fp!(2u64, params);
+// Create field elements using the default field
+let one = fp!(1u64);
+let two = fp!(2u64);
 
 // Create polynomial P(x) = 1 + 2x
 let poly = DensePolynomial::new(vec![one, two]);
 
 // Evaluate at a point
-let x = fp!(5u64, params);
+let x = fp!(5u64);
 let y = poly.evaluate(&x);
 ```
 
@@ -88,7 +86,7 @@ The library is structured into several core modules:
 - **`field`**: Finite field arithmetic implementations.
     - `montgomery`: Montgomery reduction parameters and algorithms.
     - `element`: `FieldElement` wrapper for modular arithmetic.
-    - `constants`: Pre-defined field parameters.
+    - `config`: Field configuration trait and default parameters.
 - **`poly`**: Polynomial arithmetic.
     - `dense`: Dense polynomial representation and operations.
     - `ntt`: Number Theoretic Transform implementations.

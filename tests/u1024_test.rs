@@ -1,0 +1,223 @@
+use mathlib::traits::BigInt;
+use mathlib::{U1024, u1024};
+
+#[test]
+fn test_u1024_const_add() {
+    let a = U1024([100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (sum, carry) = a.const_add(&b);
+    assert_eq!(sum.0[0], 150);
+    assert_eq!(carry, false);
+}
+
+#[test]
+fn test_u1024_const_add_with_carry() {
+    let a = U1024([u64::MAX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (sum, _carry) = a.const_add(&b);
+    assert_eq!(sum.0[0], 0);
+    assert_eq!(sum.0[1], 1);
+}
+
+#[test]
+fn test_u1024_const_sub() {
+    let a = U1024([100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (diff, borrow) = a.const_sub(&b);
+    assert_eq!(diff.0[0], 50);
+    assert_eq!(borrow, false);
+}
+
+#[test]
+fn test_u1024_const_sub_with_borrow() {
+    let a = U1024([0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (diff, _borrow) = a.const_sub(&b);
+    assert_eq!(diff.0[0], u64::MAX);
+    assert_eq!(diff.0[1], 0);
+}
+
+#[test]
+fn test_u1024_const_mul() {
+    let a = U1024([123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([456, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (low, _high) = a.const_mul(&b);
+    assert_eq!(low.0[0], 123 * 456);
+}
+
+#[test]
+fn test_u1024_const_eq() {
+    let a = U1024([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let c = U1024([1, 2, 3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    assert!(a.const_eq(&b));
+    assert!(!a.const_eq(&c));
+}
+
+#[test]
+fn test_u1024_comparison_operators() {
+    let a = u1024!(100);
+    let b = u1024!(200);
+    let c = u1024!(100);
+
+    assert!(a < b);
+    assert!(!(b < a));
+    assert!(a <= c);
+    assert!(a >= c);
+    assert!(!(a > c));
+}
+
+#[test]
+fn test_u1024_bit_operations() {
+    let mut val = U1024::zero();
+    val.0[0] = 0b1010;
+
+    assert!(val.bit(1));
+    assert!(!val.bit(0));
+    assert!(val.bit(3));
+    assert!(!val.bit(2));
+}
+
+#[test]
+fn test_u1024_bit_high_positions() {
+    let mut val = U1024::zero();
+    val.0[15] = 1u64 << 63; // Set the highest bit
+
+    assert!(val.bit(1023));
+    assert!(!val.bit(1022));
+    assert!(!val.bit(0));
+}
+
+#[test]
+fn test_u1024_from_conversions() {
+    assert_eq!(U1024::from_u8(255), u1024!(255));
+    assert_eq!(U1024::from_u16(65535), u1024!(65535));
+    assert_eq!(U1024::from_u32(u32::MAX), u1024!(u32::MAX as u64));
+    assert_eq!(
+        U1024::from_u64(u64::MAX),
+        U1024([u64::MAX, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    );
+}
+
+#[test]
+fn test_u1024_from_u128() {
+    let val = u128::MAX;
+    let result = U1024::from_u128(val);
+
+    assert_eq!(result.0[0], u64::MAX);
+    assert_eq!(result.0[1], u64::MAX);
+    assert_eq!(result.0[2], 0);
+}
+
+#[test]
+fn test_u1024_xor() {
+    let a = U1024([
+        0xAAAAAAAAAAAAAAAA,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]);
+    let b = U1024([
+        0x5555555555555555,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]);
+
+    let result = a ^ b;
+    assert_eq!(result.0[0], 0xFFFFFFFFFFFFFFFF);
+}
+
+#[test]
+fn test_u1024_add_operator() {
+    let a = u1024!(100);
+    let b = u1024!(50);
+
+    let sum = a + b;
+    assert_eq!(sum, u1024!(150));
+}
+
+#[test]
+fn test_u1024_sub_operator() {
+    let a = u1024!(100);
+    let b = u1024!(50);
+
+    let (diff, borrow) = a.borrowing_sub(&b);
+    assert_eq!(diff, u1024!(50));
+    assert!(!borrow);
+}
+
+#[test]
+fn test_u1024_carrying_add() {
+    let mut a = U1024::zero();
+    a.0[0] = u64::MAX;
+    let b = u1024!(2);
+
+    let (sum, carry) = a.carrying_add(&b);
+    assert_eq!(sum.0[0], 1);
+    assert_eq!(sum.0[1], 1);
+    assert!(!carry);
+}
+
+#[test]
+fn test_u1024_bits_count() {
+    let val = u1024!(255); // 0xFF = 8 bits
+    assert!(val.bits() <= 8);
+
+    let big_val = U1024([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
+    assert!(big_val.bits() > 960); // Should be close to 960
+}
+
+#[test]
+fn test_u1024_zero_and_one() {
+    let zero = U1024::zero();
+    let one = U1024::one();
+
+    assert_eq!(zero.0[0], 0);
+    assert_eq!(one.0[0], 1);
+
+    for i in 1..16 {
+        assert_eq!(zero.0[i], 0);
+        assert_eq!(one.0[i], 0);
+    }
+}
+
+#[test]
+fn test_u1024_full_mul() {
+    let a = U1024([2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    let b = U1024([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+    let (low, high) = a.full_mul(&b);
+    assert_eq!(low.0[0], 6);
+    assert_eq!(high.0[0], 0);
+}

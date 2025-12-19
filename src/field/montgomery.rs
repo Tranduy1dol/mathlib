@@ -1,7 +1,6 @@
-use crate::U1024;
-use crate::traits::BigInt;
+use crate::{BigInt, U1024};
 
-/// Macro to create MontgomeryParams from different sources.
+/// Macro to create MontgomeryContext from different sources.
 ///
 /// # Examples
 ///
@@ -71,7 +70,7 @@ macro_rules! mont {
                 }
             }
 
-            $crate::field::montgomery::MontgomeryParams::new(
+            $crate::field::montgomery::MontgomeryContext::new(
                 ToU1024Param::to_u1024_param($modulus),
                 ToU1024Param::to_u1024_param($root),
             )
@@ -91,15 +90,15 @@ macro_rules! mont {
 /// - `n_prime`: Montgomery constant satisfying P * n' ≡ -1 (mod 2^1024)
 /// - `root_of_unity`: A primitive root of unity in the field, used for NTT operations
 #[derive(Clone, Debug, PartialEq, Eq, Copy)]
-pub struct MontgomeryParams {
+pub struct MontgomeryContext {
     pub modulus: U1024,
     pub r2: U1024,
     pub n_prime: U1024,
     pub root_of_unity: U1024,
 }
 
-impl MontgomeryParams {
-    /// Constructs MontgomeryParams for the given field modulus and root of unity.
+impl MontgomeryContext {
+    /// Constructs MontgomeryContext for the given field modulus and root of unity.
     ///
     /// This function precomputes the Montgomery constant n' and the value R^2 mod modulus
     /// needed for efficient Montgomery arithmetic. The root of unity is stored for use in
@@ -144,10 +143,10 @@ impl MontgomeryParams {
     ///
     /// ```
     /// use mathlib::{u1024, U1024};
-    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::field::montgomery::MontgomeryContext;
     ///
     /// let m = u1024!(3u64);
-    /// let n_prime = MontgomeryParams::compute_n_prime(&m);
+    /// let n_prime = MontgomeryContext::compute_n_prime(&m);
     /// let _: U1024 = n_prime; // n_prime can now be used in Montgomery reduction
     /// ```
     pub fn compute_n_prime(modulus: &U1024) -> U1024 {
@@ -182,10 +181,10 @@ impl MontgomeryParams {
     ///
     /// ```
     /// use mathlib::{u1024, BigInt};
-    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::field::montgomery::MontgomeryContext;
     ///
     /// let m = u1024!(3u64);
-    /// let r2 = MontgomeryParams::compute_r2(&m);
+    /// let r2 = MontgomeryContext::compute_r2(&m);
     /// // 2^2048 mod 3 == 1
     /// assert_eq!(r2, u1024!(1u64));
     /// ```
@@ -214,9 +213,9 @@ impl MontgomeryParams {
     ///
     /// ```
     /// use mathlib::u1024;
-    /// use mathlib::field::montgomery::MontgomeryParams;
+    /// use mathlib::field::montgomery::MontgomeryContext;
     ///
-    /// let params = MontgomeryParams {
+    /// let params = MontgomeryContext {
     ///     modulus: u1024!(1u64),
     ///     r2: u1024!(1u64),
     ///     n_prime: u1024!(1u64),

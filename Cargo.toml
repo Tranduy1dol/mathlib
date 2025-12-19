@@ -1,6 +1,6 @@
 [package]
 name = "mathlib"
-version = "0.4.0"
+version = "1.0.0"
 edition = "2024"
 
 [dependencies]
@@ -8,6 +8,7 @@ libc = "0.2"
 rand = "0.8"
 num-integer = "0.1.46"
 num-bigint = { version = "0.4.6", features = ["rand"]}
+mathlib_macros = { path = "mathlib_macros", version = "0.1.0" }
 
 
 [build-dependencies]
@@ -30,3 +31,6 @@ harness = false
 [[bench]]
 name = "poly_bench"
 harness = false
+
+[workspace]
+members = ["mathlib_macros"]

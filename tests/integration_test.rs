@@ -1,5 +1,34 @@
-use mathlib::traits::BigInt;
-use mathlib::{DensePolynomial, U1024, fp, mont, u1024};
+use std::fmt::Debug;
+
+use mathlib::{BigInt, DensePolynomial, FieldConfig, U1024, fp, u1024};
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct Config17;
+
+impl FieldConfig for Config17 {
+    const MODULUS: U1024 = U1024([17, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const MODULUS_BITS: u32 = 1024;
+    const R2: U1024 = U1024([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const N_PRIME: U1024 = U1024([
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+        1085102592571150095,
+    ]);
+    const ROOT_OF_UNITY: U1024 = U1024([3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+}
 
 #[test]
 fn test_gmp_add() {
@@ -39,24 +68,21 @@ fn test_gmp_mul() {
 
 #[test]
 fn test_full_flow() {
-    let mut p = U1024::zero();
-    p.0[0] = 17;
-
-    let params = mont!(p, U1024::zero());
-
-    let a = fp!(u1024!(5), &params);
-    let b = fp!(u1024!(7), &params);
+    // Uses Config17
+    let a = fp!(u1024!(5), Config17);
+    let b = fp!(u1024!(7), Config17);
     let prod = a * b;
 
-    assert_eq!(prod.to_u1024().0[0], 1, "Multiplication failed");
+    assert_eq!(prod.to_u1024().0[0], 1, "Multiplication failed"); // 35 mod 17 = 1
     println!("5 * 7 mod 17 = {:?}", prod);
 
-    let c3 = fp!(u1024!(3), &params);
-    let c2 = fp!(u1024!(2), &params);
+    let c3 = fp!(u1024!(3), Config17);
+    let c2 = fp!(u1024!(2), Config17);
 
+    // DensePolynomial<Config17> inferred
     let poly = DensePolynomial::new(vec![c3, c2]);
 
-    let x = fp!(u1024!(4), &params);
+    let x = fp!(u1024!(4), Config17);
     let eval = poly.evaluate(&x);
 
     assert_eq!(eval.to_u1024().0[0], 11, "Poly eval failed");
