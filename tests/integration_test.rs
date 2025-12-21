@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use mathlib::{BigInt, DensePolynomial, FieldConfig, U1024, fp, u1024};
+use mathlib::{BigInt, FieldConfig, Polynomial, U1024, fp, u1024};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Config17;
@@ -80,7 +80,7 @@ fn test_full_flow() {
     let c2 = fp!(u1024!(2), Config17);
 
     // DensePolynomial<Config17> inferred
-    let poly = DensePolynomial::new(vec![c3, c2]);
+    let poly = Polynomial::new(vec![c3, c2]);
 
     let x = fp!(u1024!(4), Config17);
     let eval = poly.evaluate(&x);

@@ -1,12 +1,12 @@
 use criterion::{Criterion, black_box, criterion_group, criterion_main};
-use mathlib::{DefaultFieldConfig, DensePolynomial, FieldElement};
+use mathlib::{DefaultFieldConfig, FieldElement, Polynomial};
 
 fn bench_poly_mul(c: &mut Criterion) {
     let size = 256;
 
     // Use DefaultFieldConfig instead of get_params()
     let coeffs = vec![FieldElement::<DefaultFieldConfig>::one(); size];
-    let poly = DensePolynomial::new(coeffs);
+    let poly = Polynomial::new(coeffs);
 
     let mut group = c.benchmark_group("Polynomial Multiplication (Deg 256)");
 

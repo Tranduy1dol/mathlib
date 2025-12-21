@@ -1,9 +1,9 @@
-use mathlib::{DensePolynomial, fp};
+use mathlib::{Polynomial, fp};
 
 #[test]
 fn test_polynomial_display_small_coefficients() {
     // P(x) = 3x^2 + 2x + 1 (small coefficients fit in u64)
-    let poly = DensePolynomial::new(vec![fp!(1u64), fp!(2u64), fp!(3u64)]);
+    let poly = Polynomial::new(vec![fp!(1u64), fp!(2u64), fp!(3u64)]);
     let display = format!("{}", poly);
     assert_eq!(display, "3x^2 + 2x + 1");
 }
@@ -11,7 +11,7 @@ fn test_polynomial_display_small_coefficients() {
 #[test]
 fn test_polynomial_display_coefficient_one() {
     // Verify that coefficient 1 is properly detected
-    let poly = DensePolynomial::new(vec![
+    let poly = Polynomial::new(vec![
         fp!(0u64),
         fp!(1u64), // This should display as just "x" not "1x"
     ]);
@@ -23,7 +23,7 @@ fn test_polynomial_display_coefficient_one() {
 #[test]
 fn test_polynomial_display_large_u64() {
     // Test with the maximum u64 value
-    let poly = DensePolynomial::new(vec![fp!(u64::MAX), fp!(2u64)]);
+    let poly = Polynomial::new(vec![fp!(u64::MAX), fp!(2u64)]);
 
     let display = format!("{}", poly);
     // Should still be in decimal since it fits in one limb
@@ -41,7 +41,7 @@ fn test_polynomial_display_format_consistency() {
     ];
 
     for (coeffs, expected) in test_cases {
-        let poly = DensePolynomial::new(coeffs);
+        let poly = Polynomial::new(coeffs);
         let display = format!("{}", poly);
         assert_eq!(display, expected, "Failed for polynomial: {}", display);
     }
@@ -50,7 +50,7 @@ fn test_polynomial_display_format_consistency() {
 #[test]
 fn test_polynomial_display_zero_handling() {
     // Verify zero coefficients are skipped properly
-    let poly = DensePolynomial::new(vec![fp!(7u64), fp!(0u64), fp!(0u64), fp!(5u64)]);
+    let poly = Polynomial::new(vec![fp!(7u64), fp!(0u64), fp!(0u64), fp!(5u64)]);
 
     let display = format!("{}", poly);
     assert_eq!(display, "5x^3 + 7");
@@ -62,7 +62,7 @@ fn test_polynomial_mixed_sizes_realistic() {
     // Using realistic field element values
     let coeffs = vec![fp!(12345u64), fp!(67890u64), fp!(999999u64)];
 
-    let poly = DensePolynomial::new(coeffs);
+    let poly = Polynomial::new(coeffs);
     let display = format!("{}", poly);
 
     // All should be displayed in decimal

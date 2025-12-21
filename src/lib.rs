@@ -11,7 +11,7 @@ pub use crate::field::{
     element::FieldElement,
     montgomery::MontgomeryContext,
 };
-pub use crate::poly::{dense::DensePolynomial, ntt::*};
+pub use crate::poly::{multivariate::MultivariatePolynomial, ntt::*, univariate::Polynomial};
 
 pub use traits::*;
 
