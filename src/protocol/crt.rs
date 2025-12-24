@@ -110,18 +110,24 @@ pub fn chinese_remainder_solver(remainders: &[U1024], moduli: &[U1024]) -> Resul
         let tmp = a_i.mod_mul(&big_n_i, &n);
         let term = tmp.mod_mul(&y_i, &n);
 
-        // Add to result mod n
-        // result = (result + term) % n
+        // Add to result mod n using safe modular addition
+        // Both result and term are < n, so their true sum is < 2n
+        // We need to compute (result + term) % n safely, handling potential overflow
         let (sum, carry) = result.carrying_add(&term);
         if carry {
-            // sum wrapped around 2^1024
-            // true_sum = sum + 2^1024
-            // result = (sum + 2^1024) % n
-            // 2^1024 % n is computed as (0 - n) % n
-            let correction = (U1024::ZERO - n) % n;
-            result = (sum % n + correction) % n;
+            // sum wrapped around 2^1024, true_sum = sum + 2^1024
+            // Since result < n and term < n, true_sum < 2n
+            // And true_sum >= 2^1024 >= n, so true_sum - n is the correct result
+            // true_sum - n = sum + 2^1024 - n = sum + (2^1024 - n)
+            // (2^1024 - n) in wrapping arithmetic is (U1024::ZERO - n)
+            // This addition is safe: sum < 2n - 2^1024, and when n > 2^1023,
+            // sum < 2n - 2^1024 < n, so sum + (2^1024 - n) < 2^1024 (no overflow)
+            result = sum + (U1024::ZERO - n);
+        } else if sum >= n {
+            // No overflow, but sum >= n, so subtract n
+            result = sum - n;
         } else {
-            result = sum % n;
+            result = sum;
         }
     }
 
