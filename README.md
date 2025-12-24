@@ -13,6 +13,8 @@ A high-performance mathematical library for Rust, designed for cryptographic app
 - **Number Theoretic Transform (NTT)**: Fast polynomial multiplication using NTT (O(n log n)) with Cooley-Tukey algorithm.
 - **Hardware Acceleration**: AVX2 optimized backend for specific operations on x86_64 architectures (e.g., XOR, conditional selection).
 - **GMP Integration**: Optional backend using GMP for verification and comparison (enabled via `gmp` feature).
+- **Cryptographic Protocols**: Implementation of Extended Euclidean Algorithm (GCD) and Chinese Remainder Theorem (CRT).
+- **Signed Big Integers**: `I1024` type for signed 1024-bit arithmetic.
 
 ## Installation
 
@@ -41,6 +43,34 @@ let c = u1024!("0xDEADBEEF");
 
 // From arrays
 let d = u1024!([1, 2, 3, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+// Modular Arithmetic
+let m = u1024!(17u64);
+let res = a.mod_mul(&b, &m); // (100 * 200) % 17
+```
+
+### Signed Big Integers and Protocols
+
+```rust
+use mathlib::{i1024, I1024, U1024};
+use mathlib::protocol::{extended_gcd, chinese_remainder_solver};
+
+// Signed integers
+let a = i1024!(10u64);
+let b = i1024!(-20);
+let diff = a - b; // 30
+
+// Extended GCD
+let u = U1024::from_u64(240);
+let v = U1024::from_u64(46);
+let gcd_res = extended_gcd(u, v);
+// gcd_res.gcd == 2, u*x + v*y = gcd
+
+// Chinese Remainder Theorem
+let remainders = vec![U1024::from_u64(2), U1024::from_u64(3)];
+let moduli = vec![U1024::from_u64(3), U1024::from_u64(5)];
+// x = 2 mod 3, x = 3 mod 5 => x = 8
+let result = chinese_remainder_solver(&remainders, &moduli).unwrap();
 ```
 
 ### Field Arithmetic
@@ -90,6 +120,9 @@ The library is structured into several core modules:
 - **`poly`**: Polynomial arithmetic.
     - `dense`: Dense polynomial representation and operations.
     - `ntt`: Number Theoretic Transform implementations.
+- **`protocol`**: Cryptographic primitives.
+    - `gcd`: Extended Euclidean Algorithm.
+    - `crt`: Chinese Remainder Theorem solver.
 - **`traits`**: Core traits defining the interface for big integers and fields.
 
 ## Performance

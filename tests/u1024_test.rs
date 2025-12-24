@@ -8,7 +8,7 @@ fn test_u1024_const_add() {
 
     let (sum, carry) = a.const_add(&b);
     assert_eq!(sum.0[0], 150);
-    assert_eq!(carry, false);
+    assert!(!carry);
 }
 
 #[test]
@@ -28,7 +28,7 @@ fn test_u1024_const_sub() {
 
     let (diff, borrow) = a.const_sub(&b);
     assert_eq!(diff.0[0], 50);
-    assert_eq!(borrow, false);
+    assert!(!borrow);
 }
 
 #[test]
