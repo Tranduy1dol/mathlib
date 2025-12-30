@@ -1,7 +1,9 @@
-# mathlib
+# lumen-math
 
-[![CI](https://github.com/Tranduy1dol/mathlib/actions/workflows/ci.yml/badge.svg)](https://github.com/Tranduy1dol/mathlib/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/Tranduy1dol/mathlib/graph/badge.svg?token=S88FB34UD6)](https://codecov.io/gh/Tranduy1dol/mathlib)
+[![CI](https://github.com/Tranduy1dol/lumen-math/actions/workflows/ci.yml/badge.svg)](https://github.com/Tranduy1dol/lumen-math/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Tranduy1dol/lumen-math/graph/badge.svg)](https://codecov.io/gh/Tranduy1dol/lumen-math)
+
+> ✨ Part of the [luminescent](https://github.com/Tranduy1dol/luminescent) project — *Illuminating the path to zero-knowledge*
 
 A high-performance mathematical library for Rust, designed for cryptographic applications such as Zero-Knowledge Proofs (ZKPs) and Post-Quantum Cryptography (PQC).
 
@@ -22,7 +24,7 @@ Add the following to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-mathlib = { path = "." } # Or git repository URL
+lumen-math = { git = "https://github.com/Tranduy1dol/lumen-math" }
 ```
 
 ## Usage
@@ -30,7 +32,7 @@ mathlib = { path = "." } # Or git repository URL
 ### Big Integer Arithmetic
 
 ```rust
-use mathlib::{u1024, BigInt};
+use lumen_math::{u1024, BigInt};
 
 // Create U1024 values using the u1024! macro
 let a = u1024!(100u64);
@@ -52,8 +54,8 @@ let res = a.mod_mul(&b, &m); // (100 * 200) % 17
 ### Signed Big Integers and Protocols
 
 ```rust
-use mathlib::{i1024, I1024, U1024};
-use mathlib::protocol::{extended_gcd, chinese_remainder_solver};
+use lumen_math::{i1024, I1024, U1024};
+use lumen_math::protocol::{extended_gcd, chinese_remainder_solver};
 
 // Signed integers
 let a = i1024!(10u64);
@@ -76,7 +78,7 @@ let result = chinese_remainder_solver(&remainders, &moduli).unwrap();
 ### Field Arithmetic
 
 ```rust
-use mathlib::fp;
+use lumen_math::fp;
 
 // Use the default field configuration
 let a = fp!(5u64);
@@ -84,7 +86,7 @@ let b = fp!(3u64);
 let prod = a * b;
 
 // Or define a custom field
-#[derive(mathlib::FieldConfig, Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(lumen_math::FieldConfig, Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[modulus = "0x11"] // modulus = 17
 struct MyField;
 
@@ -94,7 +96,7 @@ let c = fp!(42u64, MyField);
 ### Polynomial Operations
 
 ```rust
-use mathlib::{fp, DensePolynomial};
+use lumen_math::{fp, DensePolynomial};
 
 // Create field elements using the default field
 let one = fp!(1u64);

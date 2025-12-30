@@ -1,5 +1,5 @@
 [package]
-name = "mathlib"
+name = "lumen-math"
 version = "1.2.0"
 edition = "2024"
 
@@ -8,7 +8,7 @@ libc = "0.2"
 rand = "0.8"
 num-integer = "0.1.46"
 num-bigint = { version = "0.4.6", features = ["rand"]}
-mathlib_macros = { path = "mathlib_macros", version = "0.1.0" }
+lumen-math-macros = { path = "lumen-math-macros", version = "0.1.0" }
 sha2 = "0.10"
 
 
@@ -34,4 +34,4 @@ name = "poly_bench"
 harness = false
 
 [workspace]
-members = ["mathlib_macros"]
+members = ["lumen-math-macros"]

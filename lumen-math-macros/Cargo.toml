@@ -1,5 +1,5 @@
 [package]
-name = "mathlib_macros"
+name = "lumen-math-macros"
 version = "0.1.0"
 edition = "2021"
 

@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-12-30
+
+### Changed
+
+- **Rebranding to Luminescent**: Renamed package from `mathlib` to `lumen-math`
+  - Now part of the [luminescent](https://github.com/Tranduy1dol/luminescent) project
+  - Updated all import paths: `mathlib::*` → `lumen_math::*`
+  - Macros crate renamed from `mathlib_macros` to `lumen-math-macros`
+  - Repository URL changed to `https://github.com/Tranduy1dol/lumen-math`
+
+### Migration Guide
+
+```rust
+// Old (mathlib)
+use mathlib::{u1024, fp, BigInt};
+use mathlib::protocol::extended_gcd;
+
+// New (lumen-math)
+use lumen_math::{u1024, fp, BigInt};
+use lumen_math::protocol::extended_gcd;
+```
+
 ## [1.2.0] - 2025-12-24
 
 ### Added
