@@ -162,7 +162,7 @@ fn test_field_element_clone_copy() {
     let a = fp!(42u64);
 
     // Test Clone
-    let b = a.clone();
+    let b = a;
     assert_eq!(a.to_u1024(), b.to_u1024());
 
     // Test Copy (implicit)
@@ -176,7 +176,7 @@ fn test_field_element_debug_format() {
     let debug_str = format!("{:?}", a);
 
     // Should contain the value
-    assert!(debug_str.len() > 0);
+    assert!(!debug_str.is_empty());
 }
 
 #[test]

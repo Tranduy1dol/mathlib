@@ -33,7 +33,7 @@ proptest! {
 
         prop_assert_eq!(&res_our_big, &expected_low, "Addition result mismatch");
 
-        let expected_carry = &res_oracle >= &modulus;
+        let expected_carry = res_oracle >= modulus;
         prop_assert_eq!(carry_our, expected_carry, "Carry flag mismatch");
     }
 

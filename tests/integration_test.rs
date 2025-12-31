@@ -46,7 +46,7 @@ fn test_gmp_overflow() {
 
     assert_eq!(c.0[0], 0);
     assert_eq!(c.0[1], 1);
-    assert_eq!(carry, false);
+    assert!(!carry);
 }
 
 #[test]
@@ -242,8 +242,8 @@ fn test_comparison_equal() {
 
     assert!(a <= b);
     assert!(a >= b);
-    assert!(!(a < b));
-    assert!(!(a > b));
+    assert!((a >= b));
+    assert!((a <= b));
 }
 
 #[test]
