@@ -1,4 +1,4 @@
-use mathlib::{DefaultFieldConfig, FieldElement, U1024, u1024};
+use lumen_math::{DefaultFieldConfig, FieldElement, U1024, u1024};
 
 // Verify const construction works at compile time
 const VAL: FieldElement<DefaultFieldConfig> =

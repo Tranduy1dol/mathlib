@@ -1,4 +1,4 @@
-use mathlib::{Polynomial, fp};
+use lumen_math::{Polynomial, fp};
 
 fn main() {
     // Create some example polynomials

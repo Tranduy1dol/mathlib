@@ -1,4 +1,4 @@
-use mathlib::{I1024, U1024, i1024};
+use lumen_math::{I1024, U1024, i1024};
 
 #[test]
 fn test_i1024_construction_macros() {

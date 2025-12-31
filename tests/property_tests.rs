@@ -1,4 +1,4 @@
-use mathlib::{BigInt, U1024};
+use lumen_math::{BigInt, U1024};
 use num_bigint::BigUint;
 use num_traits::One;
 use proptest::prelude::*;

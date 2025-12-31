@@ -1,4 +1,4 @@
-use mathlib::{DefaultFieldConfig, Polynomial, fp};
+use lumen_math::{DefaultFieldConfig, Polynomial, fp};
 
 #[test]
 fn test_polynomial_addition() {

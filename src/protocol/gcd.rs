@@ -66,8 +66,8 @@ impl ExtendedGcdResult {
 /// # Examples
 ///
 /// ```
-/// use mathlib::protocol::extended_gcd;
-/// use mathlib::U1024;
+/// use lumen_math::protocol::extended_gcd;
+/// use lumen_math::U1024;
 ///
 /// let a = U1024::from_u64(30);
 /// let b = U1024::from_u64(20);
@@ -134,8 +134,8 @@ pub fn extended_gcd(a: U1024, b: U1024) -> ExtendedGcdResult {
 /// # Examples
 ///
 /// ```
-/// use mathlib::protocol::mod_inverse;
-/// use mathlib::U1024;
+/// use lumen_math::protocol::mod_inverse;
+/// use lumen_math::U1024;
 ///
 /// // 3^(-1) mod 7 = 5, since 3*5 = 15 ≡ 1 (mod 7)
 /// let result = mod_inverse(U1024::from_u64(3), U1024::from_u64(7));

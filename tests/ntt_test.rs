@@ -1,4 +1,4 @@
-use mathlib::{DefaultFieldConfig, FieldElement, fp, poly::ntt, u1024};
+use lumen_math::{DefaultFieldConfig, FieldElement, fp, poly::ntt, u1024};
 
 #[test]
 fn test_ntt_basic() {

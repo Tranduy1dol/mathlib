@@ -1,4 +1,4 @@
-use mathlib::{DefaultFieldConfig, FieldElement, bit_reverse, fp, intt, ntt};
+use lumen_math::{DefaultFieldConfig, FieldElement, bit_reverse, fp, intt, ntt};
 
 #[test]
 fn test_ntt_basic_sizes() {
@@ -7,7 +7,7 @@ fn test_ntt_basic_sizes() {
     for size in sizes {
         let mut coeffs: Vec<_> = (0..size)
             .map(|i| {
-                FieldElement::<DefaultFieldConfig>::from_montgomery(mathlib::U1024::from_u64(
+                FieldElement::<DefaultFieldConfig>::from_montgomery(lumen_math::U1024::from_u64(
                     i as u64,
                 ))
             })

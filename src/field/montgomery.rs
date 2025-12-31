@@ -5,7 +5,7 @@ use crate::{BigInt, U1024};
 /// # Examples
 ///
 /// ```
-/// use mathlib::{mont, u1024};
+/// use lumen_math::{mont, u1024};
 ///
 /// // From U1024 values
 /// let params = mont!(u1024!(17), u1024!(2));
@@ -112,7 +112,7 @@ impl MontgomeryContext {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{mont, u1024};
+    /// use lumen_math::{mont, u1024};
     ///
     /// // Construct parameters for modulus 17 with root of unity 3
     /// let m = u1024!(17);
@@ -142,8 +142,8 @@ impl MontgomeryContext {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{u1024, U1024};
-    /// use mathlib::field::montgomery::MontgomeryContext;
+    /// use lumen_math::{u1024, U1024};
+    /// use lumen_math::field::montgomery::MontgomeryContext;
     ///
     /// let m = u1024!(3u64);
     /// let n_prime = MontgomeryContext::compute_n_prime(&m);
@@ -180,8 +180,8 @@ impl MontgomeryContext {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::{u1024, BigInt};
-    /// use mathlib::field::montgomery::MontgomeryContext;
+    /// use lumen_math::{u1024, BigInt};
+    /// use lumen_math::field::montgomery::MontgomeryContext;
     ///
     /// let m = u1024!(3u64);
     /// let r2 = MontgomeryContext::compute_r2(&m);
@@ -212,8 +212,8 @@ impl MontgomeryContext {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
-    /// use mathlib::field::montgomery::MontgomeryContext;
+    /// use lumen_math::u1024;
+    /// use lumen_math::field::montgomery::MontgomeryContext;
     ///
     /// let params = MontgomeryContext {
     ///     modulus: u1024!(1u64),

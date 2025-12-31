@@ -1,4 +1,4 @@
-use mathlib::{compute_n_prime, compute_r2, u1024};
+use lumen_math::{compute_n_prime, compute_r2, u1024};
 
 #[test]
 fn test_compute_utilities() {
@@ -13,7 +13,7 @@ fn test_compute_utilities() {
     assert_eq!(r2, u1024!(1));
 
     // Verify N_PRIME (should match the known value for modulus 17)
-    let expected_n_prime = mathlib::U1024([
+    let expected_n_prime = lumen_math::U1024([
         1085102592571150095,
         1085102592571150095,
         1085102592571150095,

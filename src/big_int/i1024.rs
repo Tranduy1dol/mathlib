@@ -18,7 +18,7 @@ use super::u1024::U1024;
 /// # Examples
 ///
 /// ```
-/// use mathlib::I1024;
+/// use lumen_math::I1024;
 ///
 /// let a = I1024::from_u64(42);
 /// let b = -a;
@@ -276,7 +276,7 @@ impl fmt::Display for I1024 {
 /// # Examples
 ///
 /// ```
-/// use mathlib::i1024;
+/// use lumen_math::i1024;
 ///
 /// // From positive literal (use u64 suffix)
 /// let a = i1024!(42u64);
@@ -285,7 +285,7 @@ impl fmt::Display for I1024 {
 /// let b = i1024!(-42);
 ///
 /// // From U1024
-/// use mathlib::U1024;
+/// use lumen_math::U1024;
 /// let c = i1024!(U1024::from_u64(100));
 /// ```
 #[macro_export]

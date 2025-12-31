@@ -1,4 +1,4 @@
-use mathlib::{U1024, u1024};
+use lumen_math::{U1024, u1024};
 
 #[test]
 fn test_u1024_mod_mul_basic() {

@@ -1,7 +1,8 @@
 //! Integration tests for enhanced polynomial types.
 
-use mathlib::{DefaultFieldConfig, FieldElement, MultivariatePolynomial, Polynomial, fp, u1024};
 use std::collections::BTreeMap;
+
+use lumen_math::{DefaultFieldConfig, FieldElement, MultivariatePolynomial, Polynomial, fp, u1024};
 
 // ============================================================================
 // Polynomial (Univariate) Integration Tests

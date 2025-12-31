@@ -1,5 +1,4 @@
-use mathlib::traits::BigInt;
-use mathlib::{U1024, u1024};
+use lumen_math::{BigInt, U1024, u1024};
 
 #[test]
 fn test_u1024_const_add() {

@@ -1,5 +1,4 @@
-use mathlib::field::config::DefaultFieldConfig;
-use mathlib::{Digest, FieldElement, U1024};
+use lumen_math::{DefaultFieldConfig, Digest, FieldElement, U1024};
 
 #[test]
 fn test_digest_u1024_deterministic() {

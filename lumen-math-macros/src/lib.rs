@@ -21,7 +21,7 @@ fn biguint_to_u64_array(v: &BigUint) -> [u64; 16] {
 fn u64_array_to_tokens(arr: &[u64; 16]) -> proc_macro2::TokenStream {
     let content = arr.iter().map(|&x| quote! { #x });
     quote! {
-        mathlib::U1024([#(#content),*])
+        lumen_math::U1024([#(#content),*])
     }
 }
 
@@ -110,15 +110,15 @@ pub fn derive_field_config(input: TokenStream) -> TokenStream {
     let root_tokens = u64_array_to_tokens(&root_arr);
 
     let expanded = quote! {
-        impl mathlib::field::config::FieldConfig for #name {
-            const MODULUS: mathlib::U1024 = #modulus_tokens;
+        impl lumen_math::field::config::FieldConfig for #name {
+            const MODULUS: lumen_math::U1024 = #modulus_tokens;
             const MODULUS_BITS: u32 = 1024;
-            const R2: mathlib::U1024 = #r2_tokens;
-            const N_PRIME: mathlib::U1024 = #n_prime_tokens;
-            const ROOT_OF_UNITY: mathlib::U1024 = #root_tokens;
+            const R2: lumen_math::U1024 = #r2_tokens;
+            const N_PRIME: lumen_math::U1024 = #n_prime_tokens;
+            const ROOT_OF_UNITY: lumen_math::U1024 = #root_tokens;
 
-            fn to_montgomery_context() -> mathlib::field::montgomery::MontgomeryContext {
-                 mathlib::field::montgomery::MontgomeryContext {
+            fn to_montgomery_context() -> lumen_math::field::montgomery::MontgomeryContext {
+                 lumen_math::field::montgomery::MontgomeryContext {
                      modulus: Self::MODULUS,
                      r2: Self::R2,
                      n_prime: Self::N_PRIME,

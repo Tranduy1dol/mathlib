@@ -56,8 +56,8 @@ impl std::error::Error for CrtError {}
 /// # Examples
 ///
 /// ```
-/// use mathlib::protocol::chinese_remainder_solver;
-/// use mathlib::U1024;
+/// use lumen_math::protocol::chinese_remainder_solver;
+/// use lumen_math::U1024;
 ///
 /// // x ≡ 2 (mod 3)
 /// // x ≡ 3 (mod 5)
@@ -155,8 +155,8 @@ pub fn chinese_remainder_solver(remainders: &[U1024], moduli: &[U1024]) -> Resul
 /// # Examples
 ///
 /// ```
-/// use mathlib::protocol::chinese_remainder;
-/// use mathlib::U1024;
+/// use lumen_math::protocol::chinese_remainder;
+/// use lumen_math::U1024;
 ///
 /// // x ≡ 2 (mod 3) and x ≡ 3 (mod 5)
 /// // Solution: x = 8 (mod 15)

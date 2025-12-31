@@ -11,8 +11,8 @@ use crate::{BigInt, FieldConfig, U1024};
 /// # Examples
 ///
 /// ```
-/// use mathlib::{fp, u1024};
-/// use mathlib::field::config::DefaultFieldConfig;
+/// use lumen_math::{fp, u1024};
+/// use lumen_math::field::config::DefaultFieldConfig;
 ///
 /// // Uses DefaultFieldConfig
 /// let a = fp!("0x1234");

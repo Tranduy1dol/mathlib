@@ -1,4 +1,4 @@
-use mathlib::{DefaultFieldConfig, FieldConfig, FieldElement, fp, u1024};
+use lumen_math::{DefaultFieldConfig, FieldConfig, FieldElement, fp, u1024};
 
 #[test]
 fn test_field_element_arithmetic() {

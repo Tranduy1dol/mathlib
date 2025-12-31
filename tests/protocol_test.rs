@@ -1,7 +1,7 @@
-use mathlib::protocol::{
+use lumen_math::protocol::{
     CrtError, chinese_remainder, chinese_remainder_solver, extended_gcd, mod_inverse,
 };
-use mathlib::{U1024, i1024};
+use lumen_math::{U1024, i1024};
 
 #[test]
 fn test_extended_gcd_integration() {

@@ -1,4 +1,4 @@
-use mathlib::{FieldConfig, U1024, u1024};
+use lumen_math::{FieldConfig, U1024, u1024};
 
 #[derive(FieldConfig, Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[modulus = "0x11"] // 17

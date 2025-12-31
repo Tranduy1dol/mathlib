@@ -23,7 +23,7 @@ pub(crate) const LIMBS: usize = 16;
 /// # Examples
 ///
 /// ```
-/// use mathlib::u1024;
+/// use lumen_math::u1024;
 ///
 /// // From a hex string
 /// let a = u1024!("0x1234");
@@ -242,7 +242,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(0b10u64);
     /// assert!(!v.bit(0));
@@ -268,7 +268,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(0u64);
     /// assert_eq!(v.bits(), 0);
@@ -299,7 +299,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!("0x01ff");
     /// assert_eq!(v.0[0], 0x01ff);
@@ -339,7 +339,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(42u8);
     /// assert_eq!(v.0[0], 42);
@@ -355,7 +355,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(1000u16);
     /// assert_eq!(v.0[0], 1000);
@@ -371,7 +371,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(100000u32);
     /// assert_eq!(v.0[0], 100000);
@@ -387,7 +387,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(123456789u64);
     /// assert_eq!(v.0[0], 123456789);
@@ -403,7 +403,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let v = u1024!(0x123456789ABCDEF0123456789ABCDEFu128);
     /// assert_eq!(v.0[0], 0x0123456789ABCDEFu64);
@@ -424,7 +424,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let bits = [true, false, true, true]; // Represents binary 0b1101 = 13
     /// let v = U1024::from_bits(&bits);
@@ -451,7 +451,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let bytes = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
     /// let v = U1024::from_le_bytes(&bytes);
@@ -476,7 +476,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let bytes = [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08];
     /// let v = U1024::from_be_bytes(&bytes);
@@ -501,7 +501,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let v = U1024::from_le_bytes(&[0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
     /// let bytes = v.to_le_bytes();
@@ -524,7 +524,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let v = U1024::from_be_bytes(&[0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]);
     /// let bytes = v.to_be_bytes();
@@ -606,7 +606,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let v = U1024::from_u64(1);
     /// let shifted = v.shl(10);
@@ -650,7 +650,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let v = U1024::from_u64(1024);
     /// let shifted = v.shr(10);
@@ -694,7 +694,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let v = U1024::ZERO;
     /// let with_bit = v.with_bit(10);
@@ -724,7 +724,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let a = U1024::from_u64(100);
     /// let b = U1024::from_u64(7);
@@ -846,7 +846,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let a = U1024::from_u64(123);
     /// let b = U1024::from_u64(456);
@@ -902,7 +902,7 @@ impl U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::U1024;
+    /// use lumen_math::U1024;
     ///
     /// let base = U1024::from_u64(2);
     /// let exp = U1024::from_u64(10);
@@ -1109,7 +1109,7 @@ impl PartialOrd for U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     ///
     /// let a = u1024!(100u64);
     /// let b = u1024!(200u64);
@@ -1133,7 +1133,7 @@ impl Ord for U1024 {
     /// # Examples
     ///
     /// ```
-    /// use mathlib::u1024;
+    /// use lumen_math::u1024;
     /// use std::cmp::Ordering;
     ///
     /// let a = u1024!(100u64);
@@ -1177,7 +1177,7 @@ impl Digest for U1024 {
 
 /// Expands a message to the specified length using SHA256 (RFC 9380 style).
 fn expand_message_sha256(input: &[u8], len_in_bytes: usize) -> Vec<u8> {
-    const DST: &[u8] = b"mathlib_expand_v1";
+    const DST: &[u8] = b"lumen_math_expand_v1";
     const HASH_LEN: usize = 32;
 
     let ell = len_in_bytes.div_ceil(HASH_LEN);

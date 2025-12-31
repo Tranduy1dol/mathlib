@@ -33,7 +33,7 @@ pub trait BigInt:
 /// # Examples
 ///
 /// ```
-/// use mathlib::{U1024, Digest};
+/// use lumen_math::{U1024, Digest};
 ///
 /// let hash = U1024::from_hash(b"hello world");
 /// let hash2 = U1024::from_hash(b"hello world");

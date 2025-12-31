@@ -1,4 +1,4 @@
-use mathlib::{Polynomial, fp};
+use lumen_math::{Polynomial, fp};
 
 #[test]
 fn test_polynomial_display_small_coefficients() {

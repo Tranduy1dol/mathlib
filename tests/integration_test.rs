@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use mathlib::{BigInt, FieldConfig, Polynomial, U1024, fp, u1024};
+use lumen_math::{BigInt, FieldConfig, Polynomial, U1024, fp, u1024};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Config17;

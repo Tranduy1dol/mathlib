@@ -14,7 +14,7 @@ pub mod poly;
 pub mod protocol;
 pub mod traits;
 
-pub use mathlib_macros::FieldConfig;
+pub use lumen_math_macros::FieldConfig;
 
 // Big integers
 pub use crate::big_int::{I1024, U1024, backend::*};
