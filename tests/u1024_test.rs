@@ -66,10 +66,10 @@ fn test_u1024_comparison_operators() {
     let c = u1024!(100);
 
     assert!(a < b);
-    assert!(!(b < a));
+    assert!((b >= a));
     assert!(a <= c);
     assert!(a >= c);
-    assert!(!(a > c));
+    assert!((a <= c));
 }
 
 #[test]

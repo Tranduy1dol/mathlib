@@ -29,6 +29,12 @@ pub use crate::field::{
 // Polynomials
 pub use crate::poly::{multivariate::MultivariatePolynomial, ntt::*, univariate::Polynomial};
 
+// Lattice-specific configs (Kyber/Dilithium)
+pub use crate::poly::ntt::config::{DilithiumFieldConfig, KyberFieldConfig};
+
+// Negacyclic NTT (explicit re-export for convenience)
+pub use crate::poly::ntt::{NttContext, intt_negacyclic, mul_negacyclic, ntt_negacyclic};
+
 // Traits
 pub use traits::{BigInt, Digest};
 

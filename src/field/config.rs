@@ -25,6 +25,15 @@ pub trait FieldConfig:
     /// A primitive root of unity in the field.
     const ROOT_OF_UNITY: U1024;
 
+    /// Primitive 2Nth root of unity (ψ) for Negacyclic NTT.
+    /// Must satisfy ψ^N ≡ -1 (mod MODULUS).
+    /// Defaults to ROOT_OF_UNITY for backward compatibility.
+    const PRIMITIVE_2NTH_ROOT: U1024 = Self::ROOT_OF_UNITY;
+
+    /// The polynomial ring degree N for NTT operations.
+    /// Defaults to 256 for Kyber/Dilithium compatibility.
+    const NTT_DEGREE: usize = 256;
+
     /// Helper to convert the type-level config into a runtime `MontgomeryContext`.
     fn to_montgomery_context() -> MontgomeryContext {
         MontgomeryContext {
