@@ -216,9 +216,60 @@ impl<C: FieldConfig> NttContext<C> {
 
     /// Polynomial multiplication in Rq = Zq[X]/(X^N+1).
     ///
+    /// This function does not mutate its inputs. It clones both polynomials
+    /// internally, transforms them via NTT, performs pointwise multiplication,
+    /// and returns the inverse-transformed result.
+    ///
+    /// # Arguments
+    /// * `a` - First polynomial coefficients
+    /// * `b` - Second polynomial coefficients
+    ///
+    /// # Returns
+    /// The product polynomial coefficients in Rq.
+    ///
     /// # Panics
     /// Panics if `a.len() != self.n` or `b.len() != self.n`.
-    pub fn mul(
+    pub fn mul(&self, a: &[FieldElement<C>], b: &[FieldElement<C>]) -> Vec<FieldElement<C>> {
+        assert_eq!(
+            a.len(),
+            self.n,
+            "First polynomial length must match context size"
+        );
+        assert_eq!(
+            b.len(),
+            self.n,
+            "Second polynomial length must match context size"
+        );
+
+        // Clone inputs to avoid mutation
+        let mut a_ntt = a.to_vec();
+        let mut b_ntt = b.to_vec();
+
+        self.ntt(&mut a_ntt);
+        self.ntt(&mut b_ntt);
+
+        let mut result: Vec<_> = a_ntt
+            .iter()
+            .zip(b_ntt.iter())
+            .map(|(x, y)| *x * *y)
+            .collect();
+
+        self.intt(&mut result);
+        result
+    }
+
+    /// Polynomial multiplication with mutable inputs (in-place NTT).
+    ///
+    /// This is a more efficient variant that transforms the inputs in-place.
+    /// After calling this function, `a` and `b` will contain their NTT representations.
+    ///
+    /// # Warning
+    /// This function mutates both `a` and `b` by applying the forward NTT.
+    /// If you need to preserve the original coefficients, use [`mul`] instead.
+    ///
+    /// # Panics
+    /// Panics if `a.len() != self.n` or `b.len() != self.n`.
+    pub fn mul_in_place(
         &self,
         a: &mut [FieldElement<C>],
         b: &mut [FieldElement<C>],

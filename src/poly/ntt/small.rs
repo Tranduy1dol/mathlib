@@ -263,7 +263,7 @@ impl DilithiumFieldElement {
         Self(DILITHIUM_PSI)
     }
 
-    /// Returns the primitive 256th root of unity ω = 3072169.
+    /// Returns the primitive 256th root of unity ω = 3073009.
     #[inline]
     pub const fn omega() -> Self {
         Self(DILITHIUM_OMEGA)

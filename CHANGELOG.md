@@ -15,6 +15,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Macros crate renamed from `mathlib_macros` to `lumen-math-macros`
   - Repository URL changed to `https://github.com/Tranduy1dol/lumen-math`
 
+### Added
+
+- **Lattice-Based Cryptography Support**:
+  - **Negacyclic NTT**: Specialized NTT for Kyber/Dilithium over $Z_q[X]/(X^N + 1)$
+  - **Small-Modulus Fields**: Optimized `u16`/`u32` arithmetic with Barrett reduction
+    - `KyberFieldElement` (q=3329)
+    - `DilithiumFieldElement` (q=8380417)
+  - **`NttContext`**: Precomputed tables for efficient batch NTT operations
+
+- **Documentation**:
+  - **THEORY.md**: Comprehensive mathematical documentation with LaTeX formulas
+  - Updated README with lattice-crypto examples
+
+### Fixed
+
+- **NTT Correctness**: Fixed twiddle factor calculation for arbitrary moduli (was hardcoded for 2^32 roots)
+- **Dilithium Parameters**: Corrected `ROOT_OF_UNITY` and `ω` constants
+- **API Safety**: Made `NttContext::mul` non-mutating by default (added `mul_in_place` for efficiency)
+
+### Deprecated
+
+- **U1024-based Lattice Configs**: `KyberFieldConfig` and `DilithiumFieldConfig` are deprecated in favor of the new optimized `lumen_math::poly::ntt::small` types
+
 ### Migration Guide
 
 ```rust

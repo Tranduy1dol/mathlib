@@ -13,6 +13,8 @@ A high-performance mathematical library for Rust, designed for cryptographic app
 - **Finite Fields**: Modular arithmetic using Montgomery reduction for fast field operations.
 - **Polynomial Arithmetic**: Dense polynomial operations including addition, multiplication, and evaluation.
 - **Number Theoretic Transform (NTT)**: Fast polynomial multiplication using NTT (O(n log n)) with Cooley-Tukey algorithm.
+- **Negacyclic NTT**: Specialized NTT for lattice-based cryptography (Kyber/Dilithium) over rings $Z_q[X]/(X^N + 1)$.
+- **Small-Modulus Fields**: Optimized native `u32`/`u64` arithmetic with Barrett reduction for Kyber/Dilithium.
 - **Hardware Acceleration**: AVX2 optimized backend for specific operations on x86_64 architectures (e.g., XOR, conditional selection).
 - **GMP Integration**: Optional backend using GMP for verification and comparison (enabled via `gmp` feature).
 - **Cryptographic Protocols**: Implementation of Extended Euclidean Algorithm (GCD) and Chinese Remainder Theorem (CRT).
@@ -75,7 +77,25 @@ let moduli = vec![U1024::from_u64(3), U1024::from_u64(5)];
 let result = chinese_remainder_solver(&remainders, &moduli).unwrap();
 ```
 
-### Field Arithmetic
+### Lattice-Based Cryptography (Kyber/Dilithium)
+
+The library provides optimized field types for lattice-based schemes used in Post-Quantum Cryptography:
+
+```rust
+use lumen_math::poly::ntt::small::{KyberFieldElement, DilithiumFieldElement};
+
+// Kyber (q = 3329) - Uses optimized u16 arithmetic
+let k1 = KyberFieldElement::new(100);
+let k2 = KyberFieldElement::new(200);
+let k_prod = k1 * k2; // Efficient modular multiplication
+
+// Dilithium (q = 8380417) - Uses optimized u32 arithmetic
+let d1 = DilithiumFieldElement::new(12345);
+let d2 = DilithiumFieldElement::new(67890);
+let d_prod = d1 * d2;
+```
+
+### Field Arithmetic (Generic)
 
 ```rust
 use lumen_math::fp;
@@ -93,21 +113,24 @@ struct MyField;
 let c = fp!(42u64, MyField);
 ```
 
-### Polynomial Operations
+### Polynomial Operations & NTT
 
 ```rust
 use lumen_math::{fp, DensePolynomial};
+use lumen_math::poly::ntt::{ntt, intt};
 
 // Create field elements using the default field
 let one = fp!(1u64);
 let two = fp!(2u64);
 
 // Create polynomial P(x) = 1 + 2x
-let poly = DensePolynomial::new(vec![one, two]);
+let mut poly = vec![one, two]; // Coefficients
 
-// Evaluate at a point
-let x = fp!(5u64);
-let y = poly.evaluate(&x);
+// Perform Number Theoretic Transform
+ntt(&mut poly);
+
+// Perform Inverse NTT
+intt(&mut poly);
 ```
 
 ## Architecture
@@ -121,7 +144,11 @@ The library is structured into several core modules:
     - `config`: Field configuration trait and default parameters.
 - **`poly`**: Polynomial arithmetic.
     - `dense`: Dense polynomial representation and operations.
-    - `ntt`: Number Theoretic Transform implementations.
+    - `ntt`: Number Theoretic Transform (cyclic and negacyclic) implementations.
+        - `mod.rs`: Generic `NttContext` and re-exports.
+        - `cyclic.rs`: Standard cyclic NTT over $Z_q[X]/(X^N-1)$.
+        - `negacyclic.rs`: Negacyclic NTT over $Z_q[X]/(X^N+1)$.
+        - `small.rs`: Specialized small-modulus field types.
 - **`protocol`**: Cryptographic primitives.
     - `gcd`: Extended Euclidean Algorithm.
     - `crt`: Chinese Remainder Theorem solver.

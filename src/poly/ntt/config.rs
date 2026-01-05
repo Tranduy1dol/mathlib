@@ -195,7 +195,7 @@ mod tests {
     // The mathematical constants (primitive roots) are verified correct:
     // - Kyber: ζ = 17, ζ^256 ≡ 1 (mod 3329) ✓
     // - Dilithium: ψ = 1753, ψ^256 ≡ -1 (mod 8380417) ✓
-    // - Dilithium: ω = 3072169, ω^256 ≡ 1 (mod 8380417) ✓
+    // - Dilithium: ω = 3073009, ω^256 ≡ 1 (mod 8380417) ✓
 
     #[test]
     #[ignore = "U1024 Montgomery incompatible with small moduli - use small::KyberFieldElement"]
