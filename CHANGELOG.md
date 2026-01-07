@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-01-06
+
+### Added
+
+- **Ring Element for Lattice Cryptography**: New `RingElement<C>` type for polynomials in $R_q = \mathbb{Z}_q[X]/(X^N + 1)$
+  - **Dual-state representation**: Coefficient form ↔ NTT form with lazy conversion
+  - **Arithmetic operations**: `Add`, `Sub`, `Mul`, `Neg` for both owned and reference types
+  - **State management**: `to_ntt()`, `to_coefficient()`, `into_ntt()`, `into_coefficient()`
+  - **Shared context**: Uses `Arc<NttContext<C>>` for efficient NTT table sharing
+  - **Query methods**: `state()`, `coefficients()`, `ntt_values()`, `is_zero()`, `scale()`
+  - Exports: `RingElement`, `RingElementState` from `lumen_math::ring`
+
+### Improved
+
+- **Public ring module**: `lumen_math::ring` is now public for direct access
+
 ## [1.3.0] - 2025-12-30
 
 ### Changed

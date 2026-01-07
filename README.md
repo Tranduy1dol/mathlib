@@ -15,6 +15,7 @@ A high-performance mathematical library for Rust, designed for cryptographic app
 - **Number Theoretic Transform (NTT)**: Fast polynomial multiplication using NTT (O(n log n)) with Cooley-Tukey algorithm.
 - **Negacyclic NTT**: Specialized NTT for lattice-based cryptography (Kyber/Dilithium) over rings $Z_q[X]/(X^N + 1)$.
 - **Small-Modulus Fields**: Optimized native `u32`/`u64` arithmetic with Barrett reduction for Kyber/Dilithium.
+- **Ring Elements**: `RingElement<C>` with dual-state (coefficient/NTT) representation and lazy conversion.
 - **Hardware Acceleration**: AVX2 optimized backend for specific operations on x86_64 architectures (e.g., XOR, conditional selection).
 - **GMP Integration**: Optional backend using GMP for verification and comparison (enabled via `gmp` feature).
 - **Cryptographic Protocols**: Implementation of Extended Euclidean Algorithm (GCD) and Chinese Remainder Theorem (CRT).
@@ -95,6 +96,25 @@ let d2 = DilithiumFieldElement::new(67890);
 let d_prod = d1 * d2;
 ```
 
+### Ring Elements (Polynomial Rings)
+
+For operations in polynomial rings $R_q = \mathbb{Z}_q[X]/(X^N + 1)$:
+
+```rust
+use lumen_math::{RingElement, NttContext, DefaultFieldConfig, fp};
+use std::sync::Arc;
+
+// Create shared NTT context
+let ctx = Arc::new(NttContext::<DefaultFieldConfig>::new(256));
+
+// Create ring elements
+let a = RingElement::new(vec![fp!(1u64); 256], ctx.clone());
+let b = RingElement::one(ctx);
+
+// Arithmetic (auto-converts between coefficient/NTT forms)
+let product = a * b;  // Uses NTT multiplication
+```
+
 ### Field Arithmetic (Generic)
 
 ```rust
@@ -152,6 +172,8 @@ The library is structured into several core modules:
 - **`protocol`**: Cryptographic primitives.
     - `gcd`: Extended Euclidean Algorithm.
     - `crt`: Chinese Remainder Theorem solver.
+- **`ring`**: Ring elements for lattice-based cryptography.
+    - `element`: `RingElement<C>` with dual-state (coefficient/NTT) representation.
 - **`traits`**: Core traits defining the interface for big integers and fields.
 
 ## Performance

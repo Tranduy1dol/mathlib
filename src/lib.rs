@@ -12,6 +12,7 @@ pub mod big_int;
 pub mod field;
 pub mod poly;
 pub mod protocol;
+pub mod ring;
 pub mod traits;
 
 pub use lumen_math_macros::FieldConfig;
@@ -44,6 +45,9 @@ pub use crate::poly::ntt::{NttContext, intt_negacyclic, mul_negacyclic, ntt_nega
 
 // Traits
 pub use traits::{BigInt, Digest};
+
+// Ring elements for lattice crypto
+pub use crate::ring::{RingElement, RingElementState};
 
 /// Computes N' for Montgomery reduction where P * N' = -1 mod 2^1024.
 ///

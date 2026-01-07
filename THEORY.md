@@ -249,6 +249,23 @@ $$
 | **Kyber** | 3329 | 256 | 17 | 289 |
 | **Dilithium** | 8380417 | 256 | 1753 | 3073009 |
 
+### Ring Elements
+
+The `RingElement<C>` type encapsulates polynomials in the ring $R_q$ with lazy state management:
+
+**State Representation:**
+- **Coefficient form**: $[c_0, c_1, \ldots, c_{N-1}]$ — natural representation
+- **NTT form**: $[\hat{c}_0, \hat{c}_1, \ldots, \hat{c}_{N-1}]$ — transformed for multiplication
+
+**Lazy Conversion:**
+- Addition/Subtraction: Operates in coefficient form (auto-converts if needed)
+- Multiplication: Operates in NTT form (pointwise multiplication is $O(N)$)
+- Negation: Works in either form (coefficient-wise negation)
+
+**Efficiency:**
+- Shared `NttContext<C>` via `Arc` avoids recomputing twiddle factors
+- State tracking prevents redundant conversions
+
 ---
 
 ## Number Theory Algorithms
