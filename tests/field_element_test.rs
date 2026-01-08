@@ -7,7 +7,6 @@ fn test_field_element_arithmetic() {
 
     // Test addition
     let sum = a + b;
-    // Just verify it works, actual correctness is tested by other means
     assert!(!sum.is_zero());
 
     // Test subtraction

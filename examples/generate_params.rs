@@ -1,16 +1,17 @@
-use num_bigint::{BigUint, RandBigInt};
+use num_bigint::BigUint;
 use num_integer::Integer;
 use num_traits::One;
+use rand::Rng;
 
 fn main() {
     println!("🔍 Searching for 1024-bit NTT-friendly prime...");
     let n_power = 32;
     let two_pow_32 = BigUint::one() << n_power;
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     loop {
-        let mut k = rng.gen_biguint(992);
+        let mut k = gen_biguint(&mut rng, 992);
         k |= BigUint::one() << 991;
         k |= BigUint::one();
         if k.is_even() {
@@ -32,12 +33,12 @@ fn main() {
 }
 
 fn find_primitive_root(p: &BigUint, k: &BigUint, n: u32) -> BigUint {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     let one = BigUint::one();
     let two_pow_n_minus_1 = BigUint::one() << (n - 1);
 
     loop {
-        let g = rng.gen_biguint_range(&BigUint::from(2u32), p);
+        let g = gen_biguint_range(&mut rng, &BigUint::from(2u32), p);
 
         let w = g.modpow(k, p);
 
@@ -71,9 +72,9 @@ fn is_prob_prime(n: &BigUint, k: usize) -> bool {
         r += 1;
     }
 
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
     'witness: for _ in 0..k {
-        let a = rng.gen_biguint_range(&two, &n_minus_1);
+        let a = gen_biguint_range(&mut rng, &two, &n_minus_1);
 
         let mut x = a.modpow(&d, n);
 
@@ -90,4 +91,37 @@ fn is_prob_prime(n: &BigUint, k: usize) -> bool {
         return false;
     }
     true
+}
+
+/// Generate a random BigUint with the specified number of bits
+fn gen_biguint<R: Rng>(rng: &mut R, bits: usize) -> BigUint {
+    let bytes_needed = (bits + 7).div_ceil(8);
+    let mut bytes = vec![0u8; bytes_needed];
+    rng.fill(&mut bytes[..]);
+
+    // Mask the top byte if bits is not a multiple of 8
+    let extra_bits = bits % 8;
+    if extra_bits != 0 {
+        bytes[bytes_needed - 1] &= (1u8 << extra_bits) - 1;
+    }
+
+    BigUint::from_bytes_le(&bytes)
+}
+
+/// Generate a random BigUint in the range [low, high)
+fn gen_biguint_range<R: Rng>(rng: &mut R, low: &BigUint, high: &BigUint) -> BigUint {
+    use num_traits::Zero;
+
+    let range = high - low;
+    if range.is_zero() {
+        return low.clone();
+    }
+
+    let bits = range.bits() as usize;
+    loop {
+        let candidate = gen_biguint(rng, bits);
+        if candidate < range {
+            return low + candidate;
+        }
+    }
 }

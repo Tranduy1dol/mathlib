@@ -141,9 +141,9 @@ mod tests {
         let arr = biguint_to_u64_array(&value);
 
         assert_eq!(arr[0], 42);
-        for i in 1..16 {
+        (1..16).for_each(|i| {
             assert_eq!(arr[i], 0, "Limb {} should be zero", i);
-        }
+        });
     }
 
     #[test]
@@ -152,9 +152,9 @@ mod tests {
         let arr = biguint_to_u64_array(&value);
 
         assert_eq!(arr[0], u64::MAX);
-        for i in 1..16 {
+        (1..16).for_each(|i| {
             assert_eq!(arr[i], 0, "Limb {} should be zero", i);
-        }
+        });
     }
 
     #[test]
@@ -167,9 +167,9 @@ mod tests {
 
         assert_eq!(arr[0], 12345);
         assert_eq!(arr[1], u64::MAX);
-        for i in 2..16 {
+        (2..16).for_each(|i| {
             assert_eq!(arr[i], 0, "Limb {} should be zero", i);
-        }
+        });
     }
 
     #[test]
@@ -177,9 +177,9 @@ mod tests {
         let value = BigUint::from(0u64);
         let arr = biguint_to_u64_array(&value);
 
-        for i in 0..16 {
+        (0..16).for_each(|i| {
             assert_eq!(arr[i], 0, "All limbs should be zero");
-        }
+        });
     }
 
     #[test]

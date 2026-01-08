@@ -187,6 +187,10 @@ impl<C: FieldConfig> FieldElement<C> {
         if !borrow { sub_res } else { t }
     }
 
+    pub fn conditional_select(a: &Self, b: &Self, choice: bool) -> Self {
+        FieldElement::from_montgomery(U1024::conditional_select(&a.value, &b.value, choice))
+    }
+
     /// Computes `self` raised to the power of `exp` using square-and-multiply.
     pub fn pow(&self, exp: U1024) -> Self {
         let mut res = Self::one(); // runtime version of one? Const one!
@@ -195,10 +199,12 @@ impl<C: FieldConfig> FieldElement<C> {
         for i in 0..16 {
             let mut limb = exp.0[i];
             for _ in 0..64 {
-                if (limb & 1) == 1 {
-                    res = res * base;
-                }
-                base = base * base;
+                let bit = (limb & 1) == 1;
+                let product = res * base;
+
+                res = Self::conditional_select(&product, &res, bit);
+                base = base.square();
+
                 limb >>= 1;
             }
         }

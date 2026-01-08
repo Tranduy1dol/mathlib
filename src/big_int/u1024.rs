@@ -142,6 +142,8 @@ pub struct U1024(pub [u64; LIMBS]);
 impl U1024 {
     pub const ZERO: Self = Self([0; LIMBS]);
 
+    pub const ONE: Self = Self([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
     /// Const-compatible equality check
     pub const fn const_eq(&self, other: &Self) -> bool {
         let mut i = 0;
@@ -280,12 +282,18 @@ impl U1024 {
     /// assert_eq!(v.bits(), 5);
     /// ```
     pub fn bits(&self) -> usize {
-        for (i, limb) in self.0.iter().enumerate().rev() {
-            if *limb != 0 {
-                return (i + 1) * 64 - limb.leading_zeros() as usize;
-            }
+        let mut result = 0usize;
+        // Iterate from lowest to highest limb
+        // The conditional select will keep updating with higher limbs that are non-zero
+        for (i, limb) in self.0.iter().enumerate() {
+            let is_nonzero = ((limb | limb.wrapping_neg()) >> 63) as usize;
+            let candidate_bits = (i + 1) * 64 - limb.leading_zeros() as usize;
+
+            let mask = 0usize.wrapping_sub(is_nonzero);
+            result = (candidate_bits & mask) | (result & !mask);
         }
-        0
+
+        result
     }
 
     /// Creates a U1024 value from a hexadecimal string.
@@ -791,23 +799,23 @@ impl U1024 {
             // Binary long division
             let mut quotient = Self::ZERO;
             let mut remainder = Self::ZERO;
+            let one = Self::ONE;
 
-            let a_bits = self.bits();
-
-            for i in (0..a_bits).rev() {
+            for i in (0..1024).rev() {
                 // Left shift remainder by 1
                 remainder = remainder.shl(1);
 
-                // Set the least significant bit of remainder to bit i of self
-                if self.bit(i) {
-                    remainder = remainder + Self::from_u64(1);
-                }
+                let bit = self.bit(i);
+                let rem_plus_one = remainder + one;
+                remainder = Self::conditional_select(&rem_plus_one, &remainder, bit);
 
-                // If remainder >= divisor, subtract divisor and set quotient bit
-                if remainder >= *divisor {
-                    remainder = remainder - *divisor;
-                    quotient = quotient.with_bit(i);
-                }
+                let (sub_result, borrow) = remainder.borrowing_sub(divisor);
+                let should_subtract = !borrow;
+
+                remainder = Self::conditional_select(&sub_result, &remainder, should_subtract);
+
+                let quotient_with_bit = quotient.with_bit(i);
+                quotient = Self::conditional_select(&quotient_with_bit, &quotient, should_subtract);
             }
 
             (quotient, remainder)
@@ -917,21 +925,23 @@ impl U1024 {
             panic!("Modulus cannot be zero");
         }
 
-        if *modulus == Self::from_u64(1) {
+        if *modulus == Self::ONE {
             return Self::ZERO;
         }
 
-        let mut result = Self::from_u64(1);
+        let mut result = Self::ONE;
         let mut base = *self % *modulus;
 
         // Process each bit of the exponent
         for i in 0..16 {
             let mut limb = exp.0[i];
             for _ in 0..64 {
-                if (limb & 1) == 1 {
-                    result = result.mod_mul(&base, modulus);
-                }
+                let bit = (limb & 1) == 1;
+                let product = result.mod_mul(&base, modulus);
+
+                result = Self::conditional_select(&product, &result, bit);
                 base = base.mod_mul(&base, modulus);
+
                 limb >>= 1;
             }
         }
@@ -998,9 +1008,13 @@ impl BigInt for U1024 {
         }
 
         let mut res = U1024([0; LIMBS]);
-        let mask = if choice { u64::MAX } else { 0 };
+        let mask = 0u64.wrapping_sub(choice as u64);
+        let mask = core::hint::black_box(mask);
         for i in 0..LIMBS {
-            res.0[i] = (a.0[i] & mask) | (b.0[i] & !mask);
+            let a_val = core::hint::black_box(a.0[i]);
+            let b_val = core::hint::black_box(b.0[i]);
+
+            res.0[i] = (a_val & mask) | (b_val & !mask);
         }
         res
     }

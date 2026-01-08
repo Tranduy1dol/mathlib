@@ -10,7 +10,7 @@ use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 use crate::poly::ntt::{intt, ntt};
-use crate::{FieldConfig, FieldElement};
+use crate::{FieldConfig, FieldElement, U1024};
 
 /// A univariate polynomial over a finite field.
 ///
@@ -116,14 +116,10 @@ impl<C: FieldConfig> Polynomial<C> {
             return Self::zero();
         }
 
-        let mut result = Vec::with_capacity(self.coeffs.len() - 1);
+        let mut result = Vec::with_capacity(self.coeffs.len().saturating_sub(1));
         for (i, coeff) in self.coeffs.iter().enumerate().skip(1) {
-            // multiply by i
-            let mut acc = FieldElement::zero();
-            for _ in 0..i {
-                acc = acc + *coeff;
-            }
-            result.push(acc);
+            let scalar = FieldElement::new(U1024::from_u64(i as u64));
+            result.push(*coeff * scalar);
         }
         Self::new(result)
     }

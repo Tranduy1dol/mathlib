@@ -5,9 +5,9 @@ edition = "2024"
 
 [dependencies]
 libc = "0.2"
-rand = "0.8"
+rand = "0.9"
 num-integer = "0.1.46"
-num-bigint = { version = "0.4.6", features = ["rand"]}
+num-bigint = { version = "0.4.6", features = ["rand"] }
 lumen-math-macros = { path = "lumen-math-macros", version = "0.1.0" }
 sha2 = "0.10"
 
@@ -16,9 +16,9 @@ sha2 = "0.10"
 pkg-config = "0.3"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.8"
 num-traits = "0.2"
-proptest = "1.4"
+proptest = "1.9"
 
 [features]
 default = ["avx2", "gmp"]
@@ -31,6 +31,10 @@ harness = false
 
 [[bench]]
 name = "poly_bench"
+harness = false
+
+[[bench]]
+name = "constant_time_bench"
 harness = false
 
 [workspace]

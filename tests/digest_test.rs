@@ -63,16 +63,8 @@ fn test_digest_field_element_domain() {
 
 #[test]
 fn test_digest_vectors() {
-    // Basic regression test to ensure hash algorithm doesn't change unexpectedly
-    // Ideally we would check against a standard test vector for expand_message_xmd
-    // but just ensuring consistency with our implementation is good for now.
-
-    // NOTE: If the hashing implementation (RFC 9380 paramters) changes,
-    // this value will need to be updated.
     let input = b"mathlib";
     let hash = U1024::from_hash(input);
-
-    // Just verify it's not changing randomly across runs
     let hash2 = U1024::from_hash(input);
     assert_eq!(hash, hash2);
 }
